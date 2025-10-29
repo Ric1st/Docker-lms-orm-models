@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selamat Datang di Simple LMS</title>
+    <!-- Asumsi menggunakan Bootstrap atau Tailwind/CSS kustom untuk styling dark mode -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #1a202c;
+            /* Dark background */
+            color: #e2e8f0;
+            /* Light text */
+        }
+
+        .hero {
+            min-height: 80vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="hero">
+        <div class="container mx-auto p-4">
+            <h1 class="text-5xl font-extrabold mb-4 text-white">Simple LMS</h1>
+            <p class="text-xl mb-8 text-gray-400">Platform pembelajaran daring terbaik untuk kursus Anda.</p>
+
+            <!-- Tampilkan tombol hanya jika pengguna BELUM login -->
+            {% if not user.is_authenticated %}
+            <div class="space-x-4">
+                <!-- Tombol Login -->
+                <!-- Menggunakan URL 'login' (default Django) -->
+                <a href="{% url 'login' %}"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full transition duration-300 shadow-lg">
+                    Login
+                </a>
+
+                
+            </div>
+            {% else %}
+            <p class="text-xl text-green-400">Halo, {{ user.username }}. Selamat datang kembali!</p>
+            <a href="{% url 'home' %}"
+                class="mt-4 inline-block bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300">
+                Pergi ke Dashboard
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</body>
+
+</html>

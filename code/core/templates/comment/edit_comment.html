@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit Komentar{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'my_courses' %}">Kursus Saya</a></li>
+                    <li class="breadcrumb-item"><a
+                            href="{% url 'course_content_list' course_pk=course.pk %}">{{course.name }}</a></li>
+                    <li class="breadcrumb-item"><a
+                            href="{% url 'course_content_detail' course_pk=course.pk content_pk=content.pk %}">{{content.name}}</a></li>
+                    <li class="breadcrumb-item active text-white" aria-current="page">Edit Komentar</li>
+                </ol>
+            </nav>
+
+            <div class="card shadow-lg bg-dark text-white p-4">
+                <h2 class="card-title text-primary mb-4">Edit Komentar Anda</h2>
+                <p class="text-muted">Mengedit di konten: <strong>{{ content.name }}</strong></p>
+
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="id_comment_text" class="form-label">Komentar</label>
+                        <textarea class="form-control bg-secondary text-white border-0" id="id_comment_text"
+                            name="comment_text" rows="5" required>{{ comment.comment }}</textarea>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <button type="submit" class="btn btn-primary px-4">Simpan Perubahan</button>
+                        <a href="{% url 'course_content_detail' course_pk=course.pk content_pk=content.pk %}"
+                            class="btn btn-outline-secondary px-4">Batal</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

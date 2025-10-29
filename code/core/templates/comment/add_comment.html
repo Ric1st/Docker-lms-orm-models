@@ -1,0 +1,22 @@
+<div class="card mb-4 p-3 shadow-sm border-0">
+    <h5 class="card-title mb-3 text-secondary">Tinggalkan Komentar Anda</h5>
+    {% if user.is_authenticated %}
+    <!-- 
+            Penting: URL 'post_comment' membutuhkan 2 parameter: course_pk dan content_pk.
+            Kita mengambil course_pk dari Foreign Key content.course_id.pk
+        -->
+    <form action="{% url 'post_comment' course_pk=content.course_id.pk content_pk=content.pk %}" method="POST">
+        {% csrf_token %}
+        <div class="mb-3">
+            <!-- Penting: Pastikan nama input ini sama dengan yang diambil di views.py (comment_text) -->
+            <textarea name="comment_text" class="form-control" rows="3"
+                placeholder="Tulis komentar/pertanyaan Anda di sini..." required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-paper-plane me-2"></i> Kirim
+            Komentar</button>
+    </form>
+    {% else %}
+    <p class="text-warning">Anda harus <a href="{% url 'login' %}" class="alert-link">Login</a> untuk meninggalkan
+        komentar.</p>
+    {% endif %}
+</div>

@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <div class="mb-5 py-3 bg-light border rounded-3 shadow-sm text-center">
+        <h1 class="fw-bold text-primary mb-0">Dashboard Kamu</h1>
+        <p class="text-secondary mt-2">Selamat datang di ruang belajar interaktifmu!</p>
+    </div>
+
+    {% if not is_teacher %}
+    <!-- Tombol untuk siswa -->
+    <div class="d-flex justify-content-center mb-4">
+        <a href="?view=onprogress"
+            class="btn {% if active_tab == 'onprogress' %}btn-primary{% else %}btn-outline-primary{% endif %} me-2">
+            On Progress
+        </a>
+        <a href="?view=complete"
+            class="btn {% if active_tab == 'complete' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+            Complete
+        </a>
+    </div>
+    {% endif %}
+
+    <!-- Konten Course -->
+    {% if is_teacher %}
+    <h4 class="mb-3">Kelas yang Anda Ajar / Kelola</h4>
+    {% if courses %}
+    <div class="row">
+        {% for cm in courses %}
+        {% with course=cm.course_id %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <img src="{% if course.image %}{{ course.image.url }}{% else %}https://placehold.co/600x400/28a745/ffffff?text=MY+COURSE{% endif %}"
+                        class="card-img-top object-fit-cover" alt="{{ course.name }}" style="height: 180px;">
+                    <h5 class="card-title">{{ cm.course_id.name }}</h5>
+                    <p class="card-text text-white">
+                        Jumlah Anggota : {{ cm.course_id.coursemember_set.count }}
+                    </p>
+                    <a href="{% url 'course_content_list' cm.course_id.pk %}" class="btn btn-primary w-100">Lihat
+                        Konten</a>
+                </div>
+            </div>
+        </div>
+        {% endwith %}
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-center text-muted">Belum ada kursus yang Anda kelola.</p>
+    {% endif %}
+
+    {% elif active_tab == 'onprogress' %}
+    <h2 class="mb-3">Kursus Sedang Dijalani</h2>
+    {% if courses %}
+    <div class="row">
+        {% for data in courses %}
+        {% with cm=data.member course=data.course %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <img src="{% if course.image %}{{ course.image.url }}{% else %}https://placehold.co/600x400/28a745/ffffff?text=MY+COURSE{% endif %}"
+                        class="card-img-top object-fit-cover" alt="{{ course.name }}" style="height: 180px;">
+                    <h5 class="card-title mt-2">{{ course.name }}</h5>
+                    <p class="card-text">{{ course.description|truncatechars:100 }}</p>
+
+                    <a href="{% url 'course_content_list' course.pk %}"
+                        class="btn {% if data.is_fully_completed %}btn-success{% else %}btn-primary{% endif %} w-100">
+                        {% if data.is_fully_completed %}
+                        ✅ Selesai 
+                        {% else %}
+                        Masuk Kelas
+                        {% endif %}
+                    </a>
+
+                </div>
+            </div>
+        </div>
+        {% endwith %}
+        {% endfor %}
+    </div>
+    {% else %}
+    <h4 class="text-center text-light">Belum ada kursus yang sedang dijalani.</h4>
+    {% endif %}
+
+    {% elif active_tab == 'complete' %}
+    <h2 class="mb-3">Kursus Selesai</h2>
+    {% if completions %}
+    <div class="row">
+        {% for comp in completions %}
+        {% with course=comp.content_id.course_id %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm bg-light">
+                <img src="{% if course.image %}{{ course.image.url }}{% else %}https://placehold.co/600x400/28a745/ffffff?text=MY+COURSE{% endif %}"
+                    class="card-img-top object-fit-cover" alt="{{ course.name }}" style="height: 180px;">
+                <div class="card-body">
+                    <h5 class="card-title text-dark mt-2">{{ course.name }}</h5>
+                    <p class="card-title text-dark mt-2">{{ comp.content_id.name }} </p>
+                    <p class="card-text text-success fw-bold">Selesai!</p>
+                </div>
+            </div>
+        </div>
+        {% endwith %}
+        {% endfor %}
+    </div>
+    {% else %}
+    <h4 class="text-center text-light">Belum ada kursus yang <strong>Selesai</strong>.</h4>
+    {% endif %}
+
+    {% endif %}
+
+</div>
+{% endblock %}

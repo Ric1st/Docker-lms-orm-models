@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Dashboard LMS{% endblock %}
+
+{% block content %}
+<div class="container">
+
+    <!-- Bagian Selamat Datang yang Besar -->
+    <div class="p-5 mb-4 bg-primary-subtle rounded-4 shadow-lg text-white"
+        style="background-image: linear-gradient(135deg, #0b2241 0%, #1a3c63 100%);">
+        <h1 class="display-3 fw-bold mb-3">
+            Selamat Datang, <span class="text-warning">{{ username }}</span>!
+        </h1>
+        <p class="fs-4">
+            Siap untuk belajar hari ini? Lanjutkan kursus yang tertunda atau jelajahi katalog baru.
+        </p>
+        <hr class="my-4 border-warning opacity-50">
+        <a href="{% url 'course_list' %}" class="btn btn-warning btn-lg fw-bold shadow-sm">
+            <i class="fas fa-book-open me-2"></i> Jelajahi Katalog Kursus
+        </a>
+    </div>
+
+    <!-- Metrik Cepat (Quick Stats) -->
+    <div class="row g-4">
+
+        <!-- Metrik Kursus Diikuti -->
+        <div class="col-lg-4 col-md-6">
+            <div class="card shadow-md h-100 bg-card-background border-primary border-3 border-start">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <p class="text-uppercase fw-bold text-primary mb-1">Kursus Saya</p>
+                            <h4 class="mb-0 display-5 fw-bold">{{ course_count|intcomma }}</h4>
+                        </div>
+                        <i class="fas fa-graduation-cap fa-3x text-primary opacity-50"></i>
+                    </div>
+                    <a href="{% url 'my_courses' %}" class="small text-decoration-none text-white mt-2 d-block">Lihat
+                        semua kursus yang diikuti &rarr;</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Metrik Total Pengguna (Hanya untuk Admin/Staff) -->
+        {% if total_users %}
+        <div class="col-lg-4 col-md-6">
+            <div class="card shadow-md h-100 bg-card-background border-success border-3 border-start">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <p class="text-uppercase fw-bold text-success mb-1">Total Pengguna Aktif</p>
+                            <h4 class="mb-0 display-5 fw-bold">{{ total_users|intcomma }}</h4>
+                        </div>
+                        <i class="fas fa-user-friends fa-3x text-success opacity-50"></i>
+                    </div>
+                    <a href="{% url 'users' %}" class="small text-decoration-none text-white mt-2 d-block">Kelola
+                        Pengguna di Admin Panel &rarr;</a>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <!-- Jika bukan admin, tampilkan info kursus populer (placeholder) -->
+        <div class="col-lg-4 col-md-6">
+            <div class="card shadow-md h-100 bg-card-background border-info border-3 border-start">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <p class="text-uppercase fw-bold text-info mb-1">Kursus Populer</p>
+                            <h4 class="mb-0 display-5 fw-bold">Python Dasar</h4>
+                        </div>
+                        <i class="fas fa-star fa-3x text-info opacity-50"></i>
+                    </div>
+                    <span class="small text-muted mt-2 d-block">Kursus favorit para siswa LMS.</span>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Placeholder Aktivitas Terbaru -->
+        <div class="col-lg-4 col-md-6">
+            <div class="card shadow-md h-100 bg-card-background border-warning border-3 border-start">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <p class="text-uppercase fw-bold text-warning mb-1">Aktivitas Terakhir</p>
+                            <h4 class="mb-0 display-5 fw-bold">3 Jam Lalu</h4>
+                        </div>
+                        <i class="fas fa-history fa-3x text-warning opacity-50"></i>
+                    </div>
+                    <span class="small text-white mt-2 d-block">Terakhir menyelesaikan modul Django Views.</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+{% endblock content %}

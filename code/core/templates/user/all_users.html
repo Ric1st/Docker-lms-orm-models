@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block title %}Daftar Semua Pengguna{% endblock %}
+
+{% block extra_head %}
+<style>
+    body {
+        overflow-y: scroll !important;
+    }
+</style>
+{% endblock extra_head %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="p-4 rounded-4 shadow-lg h-100" style="background-color: #0b2241;">
+            <h1 class="h3 mb-1 text-white"><i class="fas fa-users me-2"></i> Daftar Semua Pengguna</h1>
+            <p class="mb-0 text-white small ">Total {{ total_users }} pengguna terdaftar. Fitur ini hanya untuk
+                Staff/Admin.</p>
+        </div>
+    </div>
+    <div class="col-md-4 d-grid">
+        <a href="{% url 'user_create' %}"
+            class="btn btn-success btn-lg shadow-lg fw-bold d-flex align-items-center justify-content-center h-100">
+            <i class="fas fa-user-plus me-2"></i> Tambah Pengguna Baru
+        </a>
+    </div>
+</div>
+
+<div class="card p-4 mb-4 shadow bg-card-background">
+    <form method="GET" action="{% url 'users' %}" class="row g-3">
+        <div class="col-md-10">
+            <input type="search" name="q" class="form-control"
+                placeholder="Cari berdasarkan Username, Email, atau Nama Lengkap..." value="{{ query|default:'' }}">
+        </div>
+        <div class="col-md-2 d-grid">
+            <button type="submit" class="btn btn-primary"><i class="fas fa-search me-2"></i> Cari</button>
+        </div>
+    </form>
+</div>
+
+{% if search_message %}
+<div class="alert alert-info shadow-sm">
+    <i class="fas fa-lightbulb me-2"></i> {{ search_message }} (Ditemukan: {{ myusers|length }})
+</div>
+{% endif %}
+
+<div class="card shadow-lg">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-dark table-hover table-striped mb-0">
+                <thead>
+                    <tr class="text-white" style="background-color: #1f2a38;">
+                        <th scope="col">#</th>
+                        <th scope="col">Username</th>
+                        <th scope="col">Nama Lengkap</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Gabung Sejak</th>
+                        <th scope="col" class="text-center">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in myusers %}
+                    <tr>
+                        <th scope="row">{{ forloop.counter }}</th>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.get_full_name|default:"-" }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>
+                            {% if user.is_superuser %}
+                            <span class="badge bg-danger text-white">Superuser</span>
+                            {% elif user.is_staff %}
+                            <span class="badge bg-warning text-dark">Staff/Admin</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Siswa</span>
+                            {% endif %}
+                            {% if not user.is_active %}
+                            <span class="badge bg-dark text-danger"><i class="fas fa-lock me-1"></i> Non-aktif</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ user.date_joined|date:"d M Y" }} ({{ user.date_joined|naturaltime }})</td>
+                        <td class="text-center">
+                            <a href="{% url 'user_update' pk=user.pk %}" class="btn btn-sm btn-info text-white me-2"
+                                title="Edit Pengguna">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal"
+                                data-bs-target="#deleteUserModal" data-user-pk="{{ user.pk }}"
+                                data-user-username="{{ user.username }}" title="Hapus Pengguna">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center p-4 text-muted">Tidak ada pengguna ditemukan.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL KONFIRMASI HAPUS (HANYA ADA SATU) -->
+<div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel" aria-hidden="true">
+    <!-- Penambahan class modal-dialog-centered dan modal-dialog-scrollable -->
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content bg-dark">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteUserModalLabel">Konfirmasi Hapus</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-white">
+                Apakah Anda yakin ingin menghapus pengguna <strong id="modal-username-placeholder"></strong>? Tindakan
+                ini tidak dapat
+                dibatalkan.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <form id="deleteUserForm" method="POST" action="" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger"><i class="fas fa-trash-alt me-2"></i>Hapus
+                        Permanen</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- AKHIR MODAL -->
+
+{% block extra_js %}
+<script>
+    // Ambil Modal
+    const deleteUserModal = document.getElementById('deleteUserModal');
+
+    // Dengarkan event ketika Modal akan ditampilkan
+    deleteUserModal.addEventListener('show.bs.modal', event => {
+        // Ambil tombol yang memicu Modal (tombol Hapus di dalam tabel)
+        const button = event.relatedTarget;
+
+        // Ambil data dari atribut data-*: data-user-pk dan data-user-username
+        const userPk = button.getAttribute('data-user-pk');
+        const username = button.getAttribute('data-user-username');
+
+        // Update konten Modal dengan data yang baru
+        const modalUsername = deleteUserModal.querySelector('#modal-username-placeholder');
+        const modalForm = deleteUserModal.querySelector('#deleteUserForm');
+
+        // Isi placeholder username
+        modalUsername.textContent = username;
+
+        // Update action URL pada FORM di dalam Modal
+        // {% url 'user_delete' pk=999 %} (pk=999 hanyalah placeholder, akan diganti JS)
+        // Kita berasumsi URL user_delete adalah users/<int:pk>/delete/
+        const deleteUrl = "{% url 'user_delete' pk=0 %}".replace('/0/', `/${userPk}/`);
+        modalForm.setAttribute('action', deleteUrl);
+    });
+</script>
+{% endblock extra_js %}
+{% endblock content %}

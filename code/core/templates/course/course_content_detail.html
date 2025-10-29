@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<h1 class="text-primary"><strong>{{course.name }}</strong></h1>
+<div class="container py-5">
+    <div class="row">
+        <!-- Kolom Kiri: Materi Konten -->
+        <div class="col-lg-8">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'my_courses' %}">Kursus Saya</a></li>
+                    <li class="breadcrumb-item"><a
+                            href="{% url 'course_content_list' course_pk=course.pk %}">{{course.name }}</a></li>
+                    <li class="breadcrumb-item active text-white" aria-current="page">{{ content.name }}</li>
+                </ol>
+            </nav>
+
+            <h1 class="display-5 fw-bold mb-4 text-white">{{ content.name }}</h1>
+            <p class="text-white small">Kursus: {{ course.name }}</p>
+
+            <hr>
+
+            <!-- Tampilkan Materi -->
+            <div class="content-body mb-5">
+                {% if content.video_url %}
+                <div class="ratio ratio-16x9 mb-4 rounded-3 shadow">
+                    <!-- Ganti dengan iframe YouTube/Vimeo jika Anda menggunakan URL embed -->
+                    <iframe src="{{ content.video_url }}" allowfullscreen></iframe>
+                </div>
+                {% endif %}
+
+                <!-- Deskripsi/Teks Konten -->
+                <div class="lead p-4 bg-secondary rounded-3 shadow-sm border border-dark border-opacity-25 text-muted">
+                    {{ content.description|safe }}
+                </div>
+
+                {% if content.file_attachment %}
+                <div
+                    class="mt-4 p-3 border rounded bg-warning bg-opacity-10 d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-file-download me-2"></i> Unduh Materi Tambahan:
+                        {{content.file_attachment.name}}</span>
+                    <a href="{{ content.file_attachment.url }}" class="btn btn-sm btn-warning">Download</a>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Bagian Komentar (Include Form) -->
+            <h3 class="mt-5 mb-3 text-primary">Diskusi & Komentar</h3>
+
+            <!-- INCLUDE FORM KOMENTAR DI SINI -->
+            {% include '../comment/add_comment.html' %}
+
+            <!-- Daftar Komentar -->
+            <div class="mt-5">
+                {% if comments %}
+                <!-- START: Pembungkus Scrollable -->
+                <div style="max-height: 400px; overflow-y: auto; padding-right: 15px;">
+                    <ul class="list-group list-group-flush">
+                        {% for comment in comments %}
+                        <li
+                            class="list-group-item d-flex justify-content-between align-items-start bg-light mb-3 border rounded shadow-sm p-3">
+                            <div class="me-auto">
+                                <div class="fw-bold text-dark">{{ comment.member_id.user_id.username }}</div>
+                                <p class="mb-0 text-break text-muted">{{ comment.comment }}</p>
+                            </div>
+                            <span class="badge bg-secondary text-white rounded-pill ms-3"
+                                title="{{ comment.created_at }}">
+                                {{ comment.created_at|date:"d M Y, H:i" }}
+                            </span>
+                            {% comment %} Tombol hanya muncul jika user adalah pemilik komentar {% endcomment %}
+                            {% if request.user.is_authenticated and comment.member_id.user_id == request.user %}
+                            <div class="dropdown ms-3">
+                                <button class="btn btn-sm text-secondary p-0" type="button" data-bs-toggle="dropdown"
+                                    aria-expanded="false" title="Aksi Komentar">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark shadow border-secondary">
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'comment_edit' comment_pk=comment.pk %}">
+                                            <i class="fas fa-edit me-2"></i> Edit
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <button class="dropdown-item text-danger" data-bs-toggle="modal"
+                                            data-bs-target="#deleteCommentModal" data-comment-id="{{ comment.pk }}"
+                                            data-comment-text="{{ comment.comment|truncatechars:30 }}">
+                                            <i class="fas fa-trash-alt me-2"></i> Hapus
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
+                            {% endif %}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <!-- END: Pembungkus Scrollable -->
+                {% else %}
+                <div class="alert alert-info">Belum ada komentar. Jadilah yang pertama berkomentar!</div>
+                {% endif %}
+            </div>
+            <!-- Akhir Daftar Komentar -->
+
+        </div>
+
+        <!-- Kolom Kanan: Navigasi Konten (Opsional) -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 sticky-top" style="top: 80px;">
+                <div class="card-body">
+                    <h6 class="card-title text-uppercase text-muted fw-bold">Navigasi Kursus</h6>
+                    <!-- Anda bisa menambahkan link ke konten lain di sini jika diperlukan -->
+                    <a href="{% url 'course_content_list' course_pk=course.pk %}"
+                        class="btn btn-outline-secondary btn-sm w-100 mt-2">
+                        Kembali ke Daftar Konten
+                    </a>
+
+                    {% if completed %}
+                    <button class="btn btn-success w-100" disabled>Selesai ✅</button>
+                    {% else %}
+                    <a href="{% url 'mark_content_complete' content.pk %}" class="btn btn-outline-success w-100">
+                        Tandai Selesai
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Modal Konfirmasi Hapus Komentar (Sudah ada) -->
+<div class="modal fade" id="deleteCommentModal" tabindex="-1" aria-labelledby="deleteCommentModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark border-secondary">
+            <div class="modal-header border-bottom-0">
+                <h5 class="modal-title text-danger" id="deleteCommentModalLabel"><i
+                        class="fas fa-exclamation-triangle me-2"></i> Konfirmasi Hapus Komentar</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-white">
+                Apakah Anda yakin ingin menghapus komentar ini: "<strong id="comment-text-placeholder"></strong>"?
+                <p class="text-warning mt-2 small">Tindakan ini tidak dapat dibatalkan.</p>
+            </div>
+            <div class="modal-footer border-top-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <form id="deleteCommentForm" method="POST" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger"><i class="fas fa-trash-alt me-2"></i> Hapus
+                        Permanen</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% comment %} Script untuk mengupdate action form modal delete KOMENTAR {% endcomment %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var deleteCommentModal = document.getElementById('deleteCommentModal');
+        if (deleteCommentModal) {
+            deleteCommentModal.addEventListener('show.bs.modal', function (event) {
+                var button = event.relatedTarget;
+                var commentId = button.getAttribute('data-comment-id');
+                var commentText = button.getAttribute('data-comment-text');
+
+                var form = deleteCommentModal.querySelector('#deleteCommentForm');
+                var textPlaceholder = deleteCommentModal.querySelector('#comment-text-placeholder');
+
+                // Set action URL form ke URL delete yang benar
+                form.action = "{% url 'comment_delete' 0 %}".replace('0', commentId);
+                textPlaceholder.textContent = commentText;
+            });
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block title %}{{ course.name }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card shadow-lg mb-4 border-0">
+            <div class="card-body p-4">
+                <h1 class="card-title text-primary display-4">{{ course.name }}</h1>
+                <p class="lead text-white">
+                    Diajarkan oleh: <span class="fw-semibold text-light">{{ course.teacher.username }}</span>
+                </p>
+
+                <h2 class="mt-4 mb-3 fs-5 text-uppercase text-secondary">Tentang Kursus</h2>
+                <div class="p-3 bg-light rounded mb-4 text-muted">
+                    <p>{{ course.description|linebreaks }}</p>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-5 p-3 border-top">
+                    <h2 class="text-success fw-bold mb-0 display-6">
+                        Rp{{ course.price|intcomma }}
+                    </h2>
+
+                    {% if user.is_authenticated %}
+                    {% if is_joined %}
+                    <a href="{% url 'course_content_list' course.pk %}" class="btn btn-success btn-lg">
+                        <i class="fas fa-check-circle"></i> Akses Kursus
+                    </a>
+                    {% else %}
+                    <a href="{% url 'join_course' course.pk %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-plus-circle"></i> Daftar Kursus Sekarang
+                    </a>
+                    {% endif %}
+                    {% else %}
+                    <a href="{% url 'login' %}?next={% url 'course_detail' course.pk %}" class="btn btn-warning btn-lg">
+                        <i class="fas fa-sign-in-alt"></i> Login untuk Mendaftar
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card shadow-sm sticky-top" style="top: 20px;">
+            {% if course.image %}
+            <img src="{{ course.image.url }}" class="card-img-top object-fit-cover" alt="{{ course.name }}"
+                style="height: 250px;">
+            {% else %}
+            <div class="p-5 text-center bg-secondary-subtle fs-4 fw-semibold text-muted">Gambar Tidak Ada</div>
+            {% endif %}
+            <div class="card-body">
+                <h5 class="card-title text-center text-secondary fw-bold">RINGKASAN</h5>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <i class="fas fa-user-tie me-2 text-info"></i> Pengajar: <span
+                            class="fw-semibold">{{course.teacher.username }}</span>
+                    </li>
+                    <li class="list-group-item">
+                        <i class="fas fa-users me-2 text-warning"></i> Total Pendaftar: <span
+                            class="badge bg-secondary">{{ course.coursemember_set.count }}</span>
+                    </li>
+                    <li class="list-group-item">
+                        <i class="fas fa-clock me-2 text-primary"></i> Dibuat: {{ course.created_at|date:"d M Y" }}
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

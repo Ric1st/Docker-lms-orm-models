@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Konten Kursus: {{ course.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
+                <nav aria-label="breadcrumb" class="mb-0">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item">
+                            <a href="{% url 'my_courses' %}" class="text-decoration-none text-primary fw-semibold">
+                                Kursus Saya
+                            </a>
+                        </li>
+                        <li class="breadcrumb-item active text-secondary" aria-current="page">
+                            {{ course.name }}
+                        </li>
+                    </ol>
+                </nav>
+
+                <a href="{% url 'exit_course' course.pk %}"
+                    class="btn btn-danger d-flex align-items-center gap-2 px-3 py-2"
+                    onclick="return confirm('Apakah kamu yakin ingin keluar dari kursus ini?');">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Keluar Kursus</span>
+                </a>
+            </div>
+            <h1 class="display-5 fw-bold mb-4 text-primary">Materi: {{ course.name }}</h1>
+
+            <h5>Deskripsi : </h5>
+            <p class="text-light">{{ course.description|default:"Deskripsi kursus ini belum tersedia." }}</p>
+
+            <hr class="mb-5">
+
+            <div class="row">
+                <!-- Loop untuk menampilkan setiap konten -->
+                {% for content in contents %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm border-0 transition-all hover:shadow-lg">
+                        <div class="card-body d-flex flex-column">
+                            <!-- Nomor urut konten (opsional) -->
+                            <span class="badge bg-primary mb-3">{{ forloop.counter }}</span>
+
+                            <!-- Judul Konten -->
+                            <h5 class="card-title fw-semibold text-dark mb-3">{{ content.title }}</h5>
+
+                            <!-- Deskripsi Singkat/Keterangan Tipe -->
+                            <p class="card-text text-sm text-white flex-grow-1">
+                                <!-- Tampilkan tipe konten (Video/Text/File) berdasarkan field yang ada -->
+                                {% if content.video_url %}
+                                <i class="fas fa-video me-1"></i> Materi Video
+                                {% elif content.file_upload %}
+                                <i class="fas fa-file-alt me-1"></i> Dokumen
+                                {% else %}
+                                <i class="fas fa-book-open me-1"></i> Artikel Bacaan
+                                {% endif %}
+                            </p>
+
+                            <!-- TOMBOL LINK KE DETAIL KONTEN -->
+                            <!-- URL ini memerlukan 2 PK: course_pk dan content_pk -->
+                            <a href="{% url 'course_content_detail' course_pk=course.pk content_pk=content.pk %}"
+                                class="btn btn-outline-primary mt-3 stretched-link">
+                                Lihat Materi <i class="fas fa-arrow-right ms-2"></i>
+                            </a>
+                            <!-- Akhir TOMBOL LINK -->
+
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12">
+                    <div class="alert alert-warning" role="alert">
+                        Belum ada konten yang ditambahkan ke kursus ini.
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- --- BAGIAN BARU: DAFTAR PESERTA DAN GURU --- -->
+            <hr class="mt-5 mb-5">
+            <h2 class="text-center mb-4 text-primary fw-bold">Peserta Kursus</h2>
+
+            <!-- CARD GURU -->
+            <div class="row justify-content-center mb-5">
+                <div class="col-md-6 col-lg-4">
+                    <div class="card shadow-lg bg-success text-white border-0">
+                        <div class="card-body text-center">
+                            <i class="fas fa-chalkboard-teacher fa-3x mb-3"></i>
+                            <h4 class="card-title fw-bold">Guru Pengajar</h4>
+                            <!-- Asumsi: course.teacher adalah objek User/Profile -->
+                            <p class="card-text fs-5">
+                                {{ course.teacher.get_full_name|default:course.teacher.username }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BAGIAN DAFTAR MURID (Hanya untuk Staff/Superuser) -->
+            {% if user.is_staff or user.is_superuser %}
+            <div class="row justify-content-center mb-5">
+                <div class="col-lg-8">
+                    <div class="card shadow-lg border-0 rounded-3 bg-dark-subtle">
+                        <div
+                            class="card-header bg-primary text-white fw-bold d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-users me-2"></i> Daftar Murid
+                            </div>
+                            <!-- Menggunakan variabel 'total' yang sudah Anda kurangi 1 di view -->
+                            <span class="badge bg-light text-dark rounded-pill fs-6">{{ total|default:0 }} Siswa</span>
+                        </div>
+                        <ul class="list-group list-group-flush">
+                            <!-- Iterasi pada student_list yang sudah dikirimkan dari view -->
+                            {% for student in student_list %}
+                            <li
+                                class="list-group-item d-flex justify-content-between align-items-center text-dark bg-white">
+                                <!-- Menampilkan nama lengkap atau username -->
+                                <div class="fw-medium">
+                                    <i class="fas fa-user-graduate me-2 text-primary"></i>
+                                    {{ student.get_full_name|default:student.username }}
+                                </div>
+                                <span class="badge bg-success rounded-pill">Aktif</span>
+                            </li>
+                            {% empty %}
+                            <li class="list-group-item text-muted text-center bg-white">
+                                Belum ada murid yang terdaftar dalam kursus ini.
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="mt-5 text-center">
+        <a href="{% url 'my_courses' %}" class="btn btn-outline-secondary btn-lg">
+            <i class="fas fa-arrow-left me-2"></i> Kembali ke Kursus Saya
+        </a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}Tambah Pengguna Baru{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-lg bg-card-background">
+            <div class="card-header bg-success text-white rounded-top-3">
+                <h1 class="h4 mb-0"><i class="fas fa-user-plus me-2"></i> Tambah Pengguna Baru</h1>
+            </div>
+            <div class="card-body p-4 text-white">
+                <form method="post" action="{% url 'user_create' %}">
+                    {% csrf_token %}
+
+                    <!-- Error messages non-field errors -->
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}
+                        <div>{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <!-- Field Username (Lebar Penuh) -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">{{ form.username.label }}</label>
+                        {{ form.username }}
+                        {% if form.username.errors %}
+                        <small class="text-danger">{{ form.username.errors.0 }}</small>
+                        {% endif %}
+                    </div>
+
+                    <!-- Password & Konfirmasi Password (Berdampingan di satu baris) -->
+                    <div class="row">
+                        <!-- PASSWORD BARU (form.password) -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">{{ form.password1.label }}</label>
+                            {{ form.password1 }}
+                            {% if form.password.errors %}
+                            <small class="text-danger">{{ form.password.errors.0 }}</small>
+                            {% endif %}
+                        </div>
+                        <!-- KONFIRMASI PASSWORD (form.password2) -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">{{ form.password2.label }}</label>
+                            {{ form.password2 }}
+                            {% if form.password2.errors %}
+                            <small class="text-danger">{{ form.password2.errors.0 }}</small>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Nama Depan & Belakang (Berdampingan di satu baris) -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">{{ form.first_name.label }}</label>
+                            {{ form.first_name }}
+                            {% if form.first_name.errors %}
+                            <small class="text-danger">{{ form.first_name.errors.0 }}</small>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">{{ form.last_name.label }}</label>
+                            {{ form.last_name }}
+                            {% if form.last_name.errors %}
+                            <small class="text-danger">{{ form.last_name.errors.0 }}</small>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Email (Lebar Penuh) -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">{{ form.email.label }}</label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                        <small class="text-danger">{{ form.email.errors.0 }}</small>
+                        {% endif %}
+                    </div>
+
+                    <!-- Status Staff -->
+                    <div class="form-check mb-4">
+                        {{ form.is_staff }}
+                        <label class="form-check-label" for="{{ form.is_staff.id_for_label }}">
+                            {{ form.is_staff.label }}
+                        </label>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'users' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i> Kembali ke Daftar
+                        </a>
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="fas fa-plus-circle me-2"></i> Buat Pengguna
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

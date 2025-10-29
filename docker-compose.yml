@@ -1,0 +1,30 @@
+# docker-compose.yml
+services:
+  django:
+    container_name: lms_app
+    image: simplelms-django # Pakai image yang sudah dibuild di project 5 
+    # agar tidak perlu build image lagi (efisiensi storage)
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./code:/code
+    ports:
+      - "8003:8000" # Akses di localhost:8003
+    depends_on:
+      - postgres
+    environment:
+      PYTHONUNBUFFERED: 1
+
+  postgres:
+    container_name: lms_db
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: lms_db
+      POSTGRES_USER: lms_user
+      POSTGRES_PASSWORD: lms_password
+    ports:
+      - "5535:5432" # Port unik untuk PostgreSQL
+    volumes:
+      - lms_db_data:/var/lib/postgresql/data
+
+volumes:
+  lms_db_data:

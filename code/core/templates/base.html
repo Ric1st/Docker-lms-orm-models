@@ -1,0 +1,279 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Simple LMS{% endblock %}</title>
+    <!-- Bootstrap 5 CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        xintegrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!-- Font Awesome untuk Icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        xintegrity="sha512-SnH5WK+bZxgPHs44uWIX+LLMDJc5f5tI3I7qH4zI7nB+5A8+M7mF9tE/Qx3vLgY3O8gP+4U+o9b+0R+F8nJ+4Q=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <!-- Custom Styles -->
+    <style>
+        :root {
+            /* Warna kustom */
+            --primary-color: #0d6efd;
+            /* Biru Bootstrap */
+            --dark-background: #121212;
+            /* Background gelap */
+            --card-background: #1e1e1e;
+            --text-light: #f0f0f0;
+            --text-muted: #b0b0b0;
+        }
+
+        body {
+            background-color: var(--dark-background);
+            color: var(--text-light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            font-family: 'Inter', sans-serif;
+            overflow-y: scroll !important;
+        }
+
+        /* Navigasi */
+        .navbar-custom {
+            background-color: #1f2a38;
+            /* Biru tua untuk header */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid #333;
+        }
+
+        .navbar-custom .nav-link {
+            color: var(--text-light);
+            transition: color 0.3s ease;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+        }
+
+        .navbar-custom .nav-link:hover,
+        .navbar-custom .nav-link.active {
+            color: var(--primary-color);
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Card Custom */
+        .card {
+            background-color: var(--card-background);
+            border: 1px solid #333;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .card-body,
+        .card-header {
+            color: var(--text-light);
+        }
+
+        .card-title {
+            color: var(--primary-color) !important;
+            font-weight: 600;
+        }
+
+        /* Footer */
+        .footer-custom {
+            background-color: #1f2a38;
+            padding: 20px 0;
+            color: var(--text-muted);
+            border-top: 1px solid #333;
+            margin-top: auto;
+        }
+
+        /* Alerts/Messages */
+        .alert {
+            border-radius: 8px;
+            /* Invert light/dark contrast for alerts */
+        }
+
+        .alert-success {
+            background-color: #144919;
+            color: #a4e4a8;
+            border-color: #38763f;
+        }
+
+        .alert-danger {
+            background-color: #551d1d;
+            color: #f4b6b6;
+            border-color: #8c3e3e;
+        }
+
+        .alert-info {
+            background-color: #1e4559;
+            color: #a2d9ff;
+            border-color: #3e7fa5;
+        }
+
+        .alert-warning {
+            background-color: #59471e;
+            color: #ffd9a2;
+            border-color: #a58e3e;
+        }
+
+        /* Form Styling for Dark Mode */
+        .form-control,
+        .form-select,
+        .form-control:focus {
+            background-color: #333;
+            color: var(--text-light);
+            border-color: #555;
+        }
+
+        .form-control::placeholder {
+            color: #777;
+        }
+
+        /* Tombol */
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+            border-color: #0b5ed7;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVIGASI BAR -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top navbar-custom">
+        <div class="container-xl">
+            <!-- Brand -->
+            <a class="navbar-brand fw-bold fs-4 text-white" href="{% url 'home' %}">
+                <i class="fas fa-graduation-cap me-2 text-warning"></i> Simple LMS
+            </a>
+
+            <!-- Toggle Button -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Menu Item -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'course_list' %}active{% endif %}"
+                            href="{% url 'course_list' %}">
+                            <i class="fas fa-book-open me-1"></i> Katalog Kursus
+                        </a>
+                    </li>
+                    {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'my_courses' %}active{% endif %}"
+                            href="{% url 'my_courses' %}">
+                            <i class="fas fa-chalkboard-teacher me-1"></i> Kursus Saya
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"
+                            href="{% url 'dashboard' %}">
+                            <i class="fas fa-graduation-cap me-1"></i> Dashboard
+                        </a>
+                    </li>
+                    {% endif %}
+                    {% if user.is_staff or user.is_superuser %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'users' %}active{% endif %}"
+                            href="{% url 'users' %}">
+                            <i class="fas fa-user-circle me-1"></i> Users
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'admin:index' %}">
+                            <i class="fas fa-shield-alt me-1"></i> Admin Panel
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+
+                <!-- Authentication Section -->
+                <ul class="navbar-nav ms-auto">
+                    {% if user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle me-1"></i> Halo, {{ user.get_full_name|default:user.username }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="{% url 'password_change' %}"><i
+                                        class="fas fa-key me-2"></i> Ganti Password</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li>
+                                <form method="post" action="{% url 'logout' %}" id="logout-form">
+                                    {% csrf_token %}
+                                    <a class="dropdown-item text-danger" href="javascript:void(0);"
+                                        onclick="document.getElementById('logout-form').submit();">
+                                        <i class="fas fa-sign-out-alt me-2"></i> Logout
+                                    </a>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="btn btn-warning fw-bold" href="{% url 'login' %}">
+                            <i class="fas fa-sign-in-alt me-2"></i> Login
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- KONTEN UTAMA -->
+    <main class="container-xl my-4 flex-grow-1">
+
+        <!-- Pesan/Alerts Django Messages -->
+        <div id="message-container" class="mt-2 mb-4">
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
+                <i class="fas fa-info-circle me-2"></i> {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+            {% endif %}
+        </div>
+
+        <!-- Block Konten -->
+        {% block content %}
+        {% endblock content %}
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer-custom text-center">
+        <div class="container-xl">
+            <span class="text-white small">© 2025 Simple LMS. Dibuat dengan Django & Bootstrap 5. | Hak Cipta
+                Dilindungi.</span>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        xintegrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+
+</body>
+
+</html>

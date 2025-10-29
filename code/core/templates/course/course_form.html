@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Kelola Mata Kuliah{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-lg rounded-4">
+                <div class="card-header bg-gradient text-white d-flex justify-content-between align-items-center"
+                    style="background: linear-gradient(90deg, #007bff, #00b4d8);">
+                    <h4 class="mb-0 fw-bold">
+                        {% if form.instance.pk %}
+                        ✏️ Edit Mata Kuliah
+                        {% else %}
+                        ➕ Tambah Mata Kuliah Baru
+                        {% endif %}
+                    </h4>
+                    <a href="{% url 'course_list' %}" class="btn btn-light btn-sm fw-semibold">
+                        <i class="fas fa-arrow-left me-1"></i> Kembali
+                    </a>
+                </div>
+
+                <div class="card-body p-4">
+                    <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        {% csrf_token %}
+
+                        <!-- Nama Mata Kuliah -->
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Nama Mata Kuliah</label>
+                            {{ form.name }}
+                            <div class="form-text text-muted">
+                                Berikan nama yang jelas dan singkat untuk mata kuliah ini.
+                            </div>
+                        </div>
+
+                        <!-- Deskripsi -->
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Deskripsi</label>
+                            {{ form.description }}
+                            <div class="form-text text-muted">
+                                Jelaskan secara singkat isi atau tujuan mata kuliah.
+                            </div>
+                        </div>
+
+                        <!-- Harga -->
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Harga (Rp)</label>
+                            {{ form.price }}
+                        </div>
+
+                        <!-- Gambar -->
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Gambar Mata Kuliah</label>
+                            <div class="d-flex align-items-center gap-3">
+                                {{ form.image }}
+                                {% if form.instance.image %}
+                                <img src="{{ form.instance.image.url }}" alt="Gambar kursus"
+                                    class="img-thumbnail rounded" style="height: 70px; width: 70px; object-fit: cover;">
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Teacher -->
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Pilih Pengajar</label>
+                            {{ form.teacher }}
+                            <input type="text" id="teacherSearch" class="form-control mt-2"
+                                placeholder="Cari nama pengajar...">
+                            <div class="form-text text-muted">Ketik untuk mencari pengajar yang tersedia.</div>
+                        </div>
+
+                        <!-- Tombol Aksi -->
+                        <div class="d-flex justify-content-end gap-3">
+                            <a href="{% url 'course_list' %}" class="btn btn-outline-secondary px-4">
+                                <i class="fas fa-times me-1"></i> Batal
+                            </a>
+                            <button type="submit" class="btn btn-success px-4 fw-semibold shadow-sm">
+                                {% if form.instance.pk %}
+                                <i class="fas fa-save me-1"></i> Simpan Perubahan
+                                {% else %}
+                                <i class="fas fa-plus me-1"></i> Tambahkan Kursus
+                                {% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Styling khusus -->
+<style>
+    input,
+    select,
+    textarea {
+        background-color: #f8f9fa !important;
+        border: 1px solid #ced4da !important;
+        border-radius: 0.5rem !important;
+        color: #000 !important;
+        padding: 10px 12px;
+        font-size: 0.95rem;
+        transition: all 0.2s ease-in-out;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+        background-color: #fff !important;
+        border-color: #00b4d8 !important;
+        box-shadow: 0 0 0 0.2rem rgba(0, 180, 216, 0.25);
+    }
+
+    ::placeholder {
+        color: #6c757d !important;
+    }
+
+    .card {
+        animation: fadeInUp 0.4s ease-in-out;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<!-- Script Filter Dropdown -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const searchInput = document.getElementById("teacherSearch");
+        const select = document.getElementById("teacherSelect");
+
+        searchInput.addEventListener("keyup", function () {
+            const filter = searchInput.value.toLowerCase();
+            const options = select.options;
+
+            for (let i = 0; i < options.length; i++) {
+                const text = options[i].text.toLowerCase();
+                options[i].style.display = text.includes(filter) ? "" : "none";
+            }
+        });
+    });
+</script>
+{% endblock %}
