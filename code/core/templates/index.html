@@ -5,53 +5,162 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Selamat Datang di Simple LMS</title>
-    <!-- Asumsi menggunakan Bootstrap atau Tailwind/CSS kustom untuk styling dark mode -->
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
     <style>
         body {
-            background-color: #1a202c;
-            /* Dark background */
+            background: linear-gradient(135deg, #0f172a, #1e293b, #3b82f6);
             color: #e2e8f0;
-            /* Light text */
+            font-family: "Poppins", sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            /* ✅ Menghilangkan overflow horizontal */
         }
 
         .hero {
-            min-height: 80vh;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             text-align: center;
+            position: relative;
+            padding: 20px;
+        }
+
+        .bg-decoration {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background: radial-gradient(circle at 25% 30%, rgba(99, 102, 241, 0.25) 0%, transparent 60%),
+                radial-gradient(circle at 80% 70%, rgba(236, 72, 153, 0.25) 0%, transparent 60%);
+            z-index: 0;
+            animation: floatBg 10s ease-in-out infinite alternate;
+        }
+
+        @keyframes floatBg {
+            from {
+                transform: translateY(0);
+            }
+
+            to {
+                transform: translateY(-15px);
+            }
+        }
+
+        .card-custom {
+            position: relative;
+            z-index: 1;
+            background: rgba(30, 41, 59, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 25px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.2);
+            transition: all 0.4s ease;
+        }
+
+        .card-custom:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 0 40px rgba(147, 51, 234, 0.4);
+        }
+
+        .text-gradient {
+            background: linear-gradient(90deg, #60a5fa, #a855f7, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+
+        .btn-glow {
+            border-radius: 50px;
+            padding: 12px 35px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-glow:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 25px rgba(236, 72, 153, 0.6);
+        }
+
+        .fade-in {
+            animation: fadeInUp 1s ease forwards;
+            opacity: 0;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        footer {
+            color: #cbd5e1;
+            margin-top: 40px;
+            font-size: 0.9rem;
         }
     </style>
 </head>
 
 <body>
-    <div class="hero">
-        <div class="container mx-auto p-4">
-            <h1 class="text-5xl font-extrabold mb-4 text-white">Simple LMS</h1>
-            <p class="text-xl mb-8 text-gray-400">Platform pembelajaran daring terbaik untuk kursus Anda.</p>
+    <section class="hero">
+        <div class="bg-decoration"></div> <!-- ✅ Background meriah tapi aman tanpa overflow -->
 
-            <!-- Tampilkan tombol hanya jika pengguna BELUM login -->
-            {% if not user.is_authenticated %}
-            <div class="space-x-4">
-                <!-- Tombol Login -->
-                <!-- Menggunakan URL 'login' (default Django) -->
-                <a href="{% url 'login' %}"
-                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full transition duration-300 shadow-lg">
-                    Login
-                </a>
+        <div class="container">
+            <div class="card card-custom mx-auto p-5 fade-in" style="max-width: 650px;">
+                <div class="card-body">
+                    <h1 class="display-4 mb-3 text-gradient">Simple LMS</h1>
+                    <p class="lead mb-5 text-light opacity-75">
+                        Tingkatkan pengalaman belajar Anda!
+                        Temukan ratusan kursus interaktif yang bisa Anda akses kapan pun dan di mana pun.
+                    </p>
 
-                
+                    {% if not user.is_authenticated %}
+                    <div class="d-flex justify-content-center gap-3 flex-wrap">
+                        <a href="{% url 'login' %}" class="btn btn-primary btn-glow">
+                            <i class="bi bi-box-arrow-in-right me-2"></i> Masuk Sekarang
+                        </a>
+                        <a href="{% url 'register' %}" class="btn btn-outline-light btn-glow">
+                            <i class="bi bi-person-plus me-2"></i> Daftar Gratis
+                        </a>
+                    </div>
+                    {% else %}
+                    <div class="text-center">
+                        <p class="fs-5 text-success mb-4">
+                            Halo, <strong>{{ user.username }}</strong> 🎉
+                            Senang melihat Anda kembali!
+                        </p>
+                        <a href="{% url 'home' %}" class="btn btn-success btn-glow">
+                            <i class="bi bi-speedometer2 me-2"></i> Pergi ke Dashboard
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
             </div>
-            {% else %}
-            <p class="text-xl text-green-400">Halo, {{ user.username }}. Selamat datang kembali!</p>
-            <a href="{% url 'home' %}"
-                class="mt-4 inline-block bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300">
-                Pergi ke Dashboard
-            </a>
-            {% endif %}
+
+            <footer class="text-center mt-5 fade-in">
+                <small>© {{ now|date:"Y" }} Simple LMS | Belajar Tanpa Batas 🚀</small>
+            </footer>
         </div>
-    </div>
+    </section>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

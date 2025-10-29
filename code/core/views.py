@@ -343,9 +343,7 @@ def course_content_detail(request, course_pk, content_pk):
 @login_required(login_url='login')
 @require_POST
 def post_comment(request, course_pk, content_pk):
-    """Memproses pengiriman komentar baru. Hanya menerima method POST."""
     
-    # KOREKSI: Menggunakan course_pk dan content_pk dari URL
     course = get_object_or_404(Course, pk=course_pk)
     content = get_object_or_404(CourseContent, pk=content_pk, course_id=course)
     user = request.user
@@ -412,7 +410,7 @@ login_required(login_url='/login/')
 def comment_delete(request, comment_pk):
     comment = get_object_or_404(Comment, pk=comment_pk)
     
-    comment_user = comment.member_id.user_id # Atau comment.member_id.user
+    comment_user = comment.member_id.user_id 
 
     # 2. Periksa apakah User yang login adalah pemilik komentar
     if comment_user == request.user:
@@ -447,11 +445,28 @@ def user_dashboard(request):
         view_type = request.GET.get('view', 'onprogress')  
         
         if view_type == 'complete':
-            completions = Completion.objects.filter(member_id__user_id=request.user)
+            completions = Completion.objects.filter(member_id__user_id=request.user).select_related(
+                'content_id__course_id'
+            ).order_by(
+                'content_id__course_id__name', 'content_id__name' 
+            )
+
+            completed_courses = {}
+            for completion in completions:
+                course = completion.content_id.course_id
+                if course.pk not in completed_courses:
+                    completed_courses[course.pk] = {
+                        'course': course,
+                        'completed_contents': []
+                    }
+                completed_courses[course.pk]['completed_contents'].append(completion.content_id)
+
+            completed_list = list(completed_courses.values())
+
             context = {
                 'is_teacher': False,
                 'active_tab': 'complete',
-                'completions': completions
+                'completions': completed_list
             }
             return render(request, 'completion/dashboard.html', context)
         

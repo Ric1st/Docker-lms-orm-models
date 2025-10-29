@@ -65,7 +65,7 @@
                     <a href="{% url 'course_content_list' course.pk %}"
                         class="btn {% if data.is_fully_completed %}btn-success{% else %}btn-primary{% endif %} w-100">
                         {% if data.is_fully_completed %}
-                        ✅ Selesai 
+                        ✅ Selesai
                         {% else %}
                         Masuk Kelas
                         {% endif %}
@@ -84,25 +84,32 @@
     {% elif active_tab == 'complete' %}
     <h2 class="mb-3">Kursus Selesai</h2>
     {% if completions %}
-    <div class="row">
-        {% for comp in completions %}
-        {% with course=comp.content_id.course_id %}
-        <div class="col-md-4 mb-4">
-            <div class="card h-100 shadow-sm bg-light">
-                <img src="{% if course.image %}{{ course.image.url }}{% else %}https://placehold.co/600x400/28a745/ffffff?text=MY+COURSE{% endif %}"
-                    class="card-img-top object-fit-cover" alt="{{ course.name }}" style="height: 180px;">
-                <div class="card-body">
-                    <h5 class="card-title text-dark mt-2">{{ course.name }}</h5>
-                    <p class="card-title text-dark mt-2">{{ comp.content_id.name }} </p>
-                    <p class="card-text text-success fw-bold">Selesai!</p>
-                </div>
+    {% for course_group in completions %}
+    <div class="card mb-4 shadow-sm border-success">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0 fw-bold">✅ {{ course_group.course.name }}</h5>
+        </div>
+        <div class="card-body" style="background-color: #1A3D64">
+            <h6 class="card-subtitle mb-2 text-light">Konten yang telah Anda selesaikan di kursus ini:</h6>
+            <ul class="list-group list-group-flush">
+                {% for content in course_group.completed_contents %}
+                <li class="list-group-item d-flex justify-content-between align-items-center mb-1 rounded-3">
+                    <span class="text-dark">{{ content.name }}</span>
+                    <span class="badge bg-success rounded-pill">Selesai</span>
+                </li>
+                {% endfor %}
+            </ul>
+
+            <div class="d-flex justify-content-end">
+                <a href="{% url 'course_content_list' course_group.course.pk %}" class="btn btn-sm btn-success mt-3">
+                    Lihat Semua Konten
+                </a>
             </div>
         </div>
-        {% endwith %}
-        {% endfor %}
     </div>
+    {% endfor %}
     {% else %}
-    <h4 class="text-center text-light">Belum ada kursus yang <strong>Selesai</strong>.</h4>
+    <h4 class="text-center text-muted">Belum ada kursus yang <strong>Selesai</strong>.</h4>
     {% endif %}
 
     {% endif %}
