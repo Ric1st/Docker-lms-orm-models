@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Hapus Kursus{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow-lg border-0 rounded-4">
+        <div class="card-header bg-danger text-white py-3 rounded-top-4">
+            <h4 class="mb-0"><i class="fas fa-trash-alt me-2"></i>Konfirmasi Hapus Kursus</h4>
+        </div>
+        <div class="card-body p-4">
+            <p class="lead">Apakah Anda yakin ingin menghapus kursus <strong>{{ content.name }}</strong>?</p>
+            <p class="text-white mb-4">Tindakan ini tidak dapat dibatalkan. Semua data terkait content ini akan hilang.
+            </p>
+            <form method="POST">
+                {% csrf_token %}
+                <div class="d-flex justify-content-between">
+                    <a href="{% url 'course_content_list' course.pk %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Batal
+                    </a>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash-alt me-2"></i>Hapus Permanen
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

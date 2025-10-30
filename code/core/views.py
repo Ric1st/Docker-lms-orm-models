@@ -11,7 +11,7 @@ from django.contrib.auth import login
 
 # Import model-model yang diperlukan
 from .models import Course, CourseMember, CourseContent, Comment, Completion
-from .forms import UserEditForm, UserAddForm, RegisterForm, CourseForm
+from .forms import UserEditForm, UserAddForm, RegisterForm, CourseForm, CourseContentForm
 
 User = get_user_model()
 
@@ -339,12 +339,15 @@ def course_content_list(request, course_pk):
     student_count = len(student_list)
     contents = CourseContent.objects.filter(course_id=course.pk).order_by('pk') 
 
+    owner = (course.teacher == user)
+
     context = {
         'course': course,
         'contents': contents,
         'is_member': is_member,
         'total': student_count,
         'student_list': student_list,   
+        'owner': owner
     }
     
     return render(request, 'course/course_content_list.html', context)
@@ -380,6 +383,93 @@ def course_content_detail(request, course_pk, content_pk):
         'completed' : completed,
     }
     return render(request, 'course/course_content_detail.html', context) 
+
+def check_course_ownership(user, course):
+    is_owner = course.teacher == user
+    is_superuser = user.is_superuser
+    return is_superuser or (user.is_staff and is_owner)
+
+# 1. CREATE (Tambah Content)
+@login_required(login_url='login')
+def content_create(request, course_pk):
+    course = get_object_or_404(Course, pk=course_pk)
+
+    if not check_course_ownership(request.user, course):
+        messages.error(request, "Anda tidak memiliki izin untuk menambah konten pada kursus ini.")
+        return redirect('content_list', course_pk=course_pk)
+    
+    if request.method == 'POST':
+        form = CourseContentForm(request.POST, request.FILES)
+        if form.is_valid():
+            new_content = form.save(commit=False)
+            new_content.course_id = course
+            new_content.save()
+            content = form.save(commit=False)
+            content.course = course
+            content.save()
+            messages.success(request, f"Konten **{content.name}** berhasil ditambahkan!")
+            return redirect('course_content_list', course_pk=course_pk)
+    else:
+        form = CourseContentForm()
+        
+    return render(request, 'courseContent/content_form.html', {
+        'form': form,
+        'course': course,
+        'title': f'Tambah Konten ke {course.name}',
+        'submit_text': 'Simpan Konten',
+    })
+
+
+# 2. UPDATE (Edit Content)
+@login_required(login_url='login')
+def content_edit(request, course_pk, content_pk):
+    course = get_object_or_404(Course, pk=course_pk)
+    content = get_object_or_404(CourseContent, pk=content_pk, course_id=course_pk)
+
+    # Pengecekan Otorisasi
+    if not check_course_ownership(request.user, course):
+        messages.error(request, "Anda tidak memiliki izin untuk mengedit konten ini.")
+        return redirect('course_content_list', course_pk=course_pk)
+
+    if request.method == 'POST':
+        form = CourseContentForm(request.POST, request.FILES, instance=content)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"Konten **{content.name}** berhasil diperbarui.")
+            return redirect('course_content_list', course_pk=course_pk)
+    else:
+        form = CourseContentForm(instance=content)
+        
+    return render(request, 'courseContent/content_form.html', {
+        'form': form,
+        'course': course,
+        'content': content,
+        'title': f'Edit Konten: {content.name}',
+        'submit_text': 'Perbarui Konten',
+    })
+
+
+# 3. DELETE (Hapus Content)
+@login_required(login_url='login')
+def content_delete(request, course_pk, content_pk):
+    course = get_object_or_404(Course, pk=course_pk)
+    content = get_object_or_404(CourseContent, pk=content_pk, course_id=course_pk)
+
+    if not check_course_ownership(request.user, course):
+        messages.error(request, "Anda tidak memiliki izin untuk menghapus konten ini.")
+        return redirect('content_list', course_pk=course_pk)
+
+    if request.method == 'POST':
+        content_name = content.name
+        content.delete()
+        messages.success(request, f"Konten **{content_name}** berhasil dihapus.")
+        return redirect('course_content_list', course_pk=course_pk)
+        
+    return render(request, 'courseContent/content_confirm_delete.html', {
+        'course': course,
+        'content': content,
+        'title': f'Hapus Konten: {content.name}',
+    })
 
 @login_required(login_url='login')
 @require_POST

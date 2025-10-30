@@ -21,11 +21,11 @@
                     </ol>
                 </nav>
 
-                <a href="{% url 'exit_course' course.pk %}"
-                    class="btn btn-danger d-flex align-items-center gap-2 px-3 py-2"
-                    onclick="return confirm('Apakah kamu yakin ingin keluar dari kursus ini?');">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>Keluar Kursus</span>
+
+                <a href="{% url 'course_content_add' course.pk %}"
+                    class="btn btn-success d-flex align-items-center gap-2 px-3 py-2">
+                    <i class="fas fa-plus"></i>
+                    <span>Tambah Konten</span>
                 </a>
             </div>
             <h1 class="display-5 fw-bold mb-4 text-primary">Materi: {{ course.name }}</h1>
@@ -36,20 +36,15 @@
             <hr class="mb-5">
 
             <div class="row">
-                <!-- Loop untuk menampilkan setiap konten -->
                 {% for content in contents %}
-                <div class="col-md-6 col-lg-4 mb-4">
+                <div class="col-md-6 col-lg-4 mb-5">
                     <div class="card h-100 shadow-sm border-0 transition-all hover:shadow-lg">
                         <div class="card-body d-flex flex-column">
-                            <!-- Nomor urut konten (opsional) -->
                             <span class="badge bg-primary mb-3">{{ forloop.counter }}</span>
 
-                            <!-- Judul Konten -->
                             <h5 class="card-title fw-semibold text-dark mb-3">{{ content.title }}</h5>
 
-                            <!-- Deskripsi Singkat/Keterangan Tipe -->
                             <p class="card-text text-sm text-white flex-grow-1">
-                                <!-- Tampilkan tipe konten (Video/Text/File) berdasarkan field yang ada -->
                                 {% if content.video_url %}
                                 <i class="fas fa-video me-1"></i> Materi Video
                                 {% elif content.file_upload %}
@@ -58,17 +53,24 @@
                                 <i class="fas fa-book-open me-1"></i> Artikel Bacaan
                                 {% endif %}
                             </p>
-
-                            <!-- TOMBOL LINK KE DETAIL KONTEN -->
-                            <!-- URL ini memerlukan 2 PK: course_pk dan content_pk -->
                             <a href="{% url 'course_content_detail' course_pk=course.pk content_pk=content.pk %}"
                                 class="btn btn-outline-primary mt-3 stretched-link">
                                 Lihat Materi <i class="fas fa-arrow-right ms-2"></i>
                             </a>
-                            <!-- Akhir TOMBOL LINK -->
-
                         </div>
                     </div>
+                    {% if owner %}
+                    <div class="card-footer bg-light border-top d-flex justify-content-between">
+                        <a href="{% url 'course_content_edit' course_pk=course.pk content_pk=content.pk %}"
+                            class="btn btn-sm btn-warning text-dark">
+                            <i class="fas fa-edit me-1"></i> Edit
+                        </a>
+                        <a href="{% url 'course_content_delete' course_pk=course.pk content_pk=content.pk %}"
+                            class="btn btn-sm btn-danger">
+                            <i class="fas fa-trash-alt me-1"></i> Hapus
+                        </a>
+                    </div>
+                    {% endif %}
                 </div>
                 {% empty %}
                 <div class="col-12">
@@ -140,6 +142,11 @@
     <div class="mt-5 text-center">
         <a href="{% url 'my_courses' %}" class="btn btn-outline-secondary btn-lg">
             <i class="fas fa-arrow-left me-2"></i> Kembali ke Kursus Saya
+        </a>
+        <a href="{% url 'exit_course' course.pk %}" class="btn btn-danger btn-lg "
+            onclick="return confirm('Apakah kamu yakin ingin keluar dari kursus ini?');">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Keluar Kursus</span>
         </a>
     </div>
 </div>

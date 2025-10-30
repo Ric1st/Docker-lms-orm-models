@@ -32,6 +32,11 @@ urlpatterns = [
     path('courses/add/', views.course_create, name='course_create'),
     path('<int:pk>/edit/', views.course_edit, name='course_edit'),
     path('<int:pk>/delete/', views.course_delete, name='course_delete'),
+
+    #Course Content CRUD
+    path('course/<int:course_pk>/contents/add/', views.content_create, name='course_content_add'),
+    path('course/<int:course_pk>/content/<int:content_pk>/edit/', views.content_edit, name='course_content_edit'),
+    path('course/<int:course_pk>/content/<int:content_pk>/delete/', views.content_delete, name='course_content_delete'),
     
     # URL Baru untuk Komentar (Harus di atas atau di bawah URL konten)
     path('comment/edit/<int:comment_pk>/', views.comment_edit, name='comment_edit'),

@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm 
-from .models import Course
+from .models import Course, CourseContent
 
 class UserEditForm(forms.ModelForm):
     # Field tambahan untuk kontrol Staff/Admin
@@ -92,3 +92,21 @@ class CourseForm(forms.ModelForm):
             'price': forms.NumberInput(attrs={'class': 'form-control text-dark'}),
             'image': forms.ClearableFileInput(attrs={'class': 'form-control'}),
         }
+
+class CourseContentForm(forms.ModelForm):
+    class Meta:
+        model = CourseContent
+        fields = ['name', 'description', 'video_url', 'file_attachment']
+        
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Masukkan Judul Konten'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Deskripsi singkat mengenai konten ini...'}),
+            'video_url': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'Contoh: https://www.youtube.com/embed/VIDEO_ID'}),
+            'file_attachment': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['name'].label = 'Judul Konten'
+        self.fields['video_url'].label = 'URL Video Embed (YouTube/Vimeo)'
+        self.fields['file_attachment'].label = 'Lampiran File'
