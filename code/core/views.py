@@ -4,7 +4,7 @@ from django.views.decorators.http import require_POST
 from django.views.generic import ListView, DetailView
 from django.contrib import messages
 from django.contrib.auth.models import User
-from django.db.models import Q 
+from django.db.models import Q, Count
 from django.core.files.storage import FileSystemStorage 
 from django.contrib.auth import get_user_model
 from django.contrib.auth import login
@@ -163,19 +163,48 @@ class CourseListView(ListView):
 
     def get_queryset(self):
         query = self.request.GET.get('q')
+        sort_option = self.request.GET.get('sort')
         queryset = super().get_queryset()
+
+        queryset = super().get_queryset().annotate(
+            member_count=Count('coursemember', filter=Q(coursemember__roles='std'))
+        )
+
         if query:
             queryset = queryset.filter(
                 Q(name__icontains=query) | Q(description__icontains=query)
             )
+
+        if sort_option == 'harga_asc':
+            queryset = queryset.order_by('price') 
+        elif sort_option == 'harga_desc':
+            queryset = queryset.order_by('-price')
+        elif sort_option == 'member_asc':
+            queryset = queryset.order_by('member_count')
+        elif sort_option == 'member_desc':
+            queryset = queryset.order_by('-member_count')
+        
         return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['query'] = self.request.GET.get('q', '')
-        context['search_message'] = None
-        if context['query']:
-            context['search_message'] = f"Hasil pencarian untuk '{context['query']}'"
+        
+        sort_option = self.request.GET.get('sort')
+        query = self.request.GET.get('q')
+
+        context['query'] = query 
+        context['sort'] = sort_option
+     
+        context['sort_message'] = None
+        if sort_option == 'harga_asc':
+            context['sort_message'] = 'Harga Termurah'
+        elif sort_option == 'harga_desc':
+            context['sort_message'] = 'Harga Termahal'
+        elif sort_option == 'member_asc':
+            context['sort_message'] = 'Jumlah Member Paling Sedikit'
+        elif sort_option == 'member_desc':
+            context['sort_message'] = 'Jumlah Member Paling Banyak'
+            
         return context
 
 @login_required
