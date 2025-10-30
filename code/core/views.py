@@ -79,11 +79,23 @@ def users(request):
         myusers = User.objects.all().order_by('date_joined')
         message = ""
 
+    admin = User.objects.filter(is_superuser=True).count()
+    staff = User.objects.filter(is_staff=True).count()
+    siswa = User.objects.filter(is_staff=False, is_superuser = False).count()
+    teacher = User.objects.filter(course__isnull=False).distinct().count()
+    Tcourse = CourseMember.objects.values('course_id').distinct().count()
+    Tmember = CourseMember.objects.filter(roles = 'std').values('user_id').distinct().count()
+    rata2 = Tcourse/Tmember
     context = {
         'myusers': myusers,
         'query': query,
         'search_message': message,
-        'total_users': User.objects.all().count()
+        'total_users': User.objects.all().count(),
+        'admin': admin,
+        'staff': staff,
+        'siswa': siswa,
+        'teacher': teacher,
+        'rata2': rata2,
     }
     return render(request, 'user/all_users.html', context)
 
@@ -464,9 +476,14 @@ def user_dashboard(request):
 
     if user.is_staff:
         course_memberships = CourseMember.objects.filter(user_id=user)
+        jumlah = Course.objects.filter(teacher=request.user).count()
+        member = CourseMember.objects.filter(user_id=user)
+        komen = Comment.objects.filter(member_id__in=member).count()
         context = {
             'is_teacher': True,
             'courses': course_memberships,
+            'jumlah': jumlah,
+            'komen': komen
         }
         return render(request, 'completion/dashboard.html', context)
 

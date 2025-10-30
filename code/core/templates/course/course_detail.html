@@ -63,6 +63,14 @@
                             class="badge bg-secondary">{{ course.coursemember_set.count }}</span>
                     </li>
                     <li class="list-group-item">
+                        <i class="fas fa-users me-2 text-warning"></i> Jumlah Konten: <span
+                            class="badge bg-secondary">{{ course.content_count }}</span>
+                    </li>
+                    <li class="list-group-item">
+                        <i class="fas fa-users me-2 text-warning"></i> Jumlah Komentar: <span
+                            class="badge bg-secondary">{{ course.comment_count }}</span>
+                    </li>
+                    <li class="list-group-item">
                         <i class="fas fa-clock me-2 text-primary"></i> Dibuat: {{ course.created_at|date:"d M Y" }}
                     </li>
                 </ul>

@@ -27,6 +27,40 @@
         </a>
     </div>
 </div>
+<div class="row mb-2">
+    <div class="col-12 mb-2">
+        <div class="alert alert-info border-0 rounded-3 shadow-sm p-3" role="alert">
+            <h5 class="alert-heading fw-bold mb-3 text-light">Detail Statistik Pengguna</h5>
+            <div class="d-flex flex-wrap gap-3">
+                <span class="badge bg-danger rounded-pill py-2 px-3">
+                    Admin: <strong class="fs-6">{{ admin }}</strong>
+                </span>
+                <span class="badge bg-warning text-dark rounded-pill py-2 px-3">
+                    Staff: <strong class="fs-6">{{ staff }}</strong>
+                </span>
+                <span class="badge bg-success rounded-pill py-2 px-3">
+                    Guru: <strong class="fs-6">{{ teacher }}</strong>
+                </span>
+                <span class="badge bg-primary rounded-pill py-2 px-3">
+                    Siswa: <strong class="fs-6">{{ siswa }}</strong>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <div class="alert alert-success border-0 rounded-3 shadow-sm p-3" role="alert">
+            <h5 class="alert-heading fw-bold mb-1 text-success">Rasio Kursus per Siswa</h5>
+            <p class="mb-0 fs-4">
+                <i class="fas fa-chart-pie me-2"></i>
+                Rata-rata Course/Siswa :
+                <span class="badge bg-dark rounded-pill py-2 px-3 ms-2">
+                    {{ rata2|floatformat:2 }}
+                </span>
+            </p>
+        </div>
+    </div>
+</div>
 
 <div class="card p-4 mb-4 shadow bg-card-background">
     <form method="GET" action="{% url 'users' %}" class="row g-3">

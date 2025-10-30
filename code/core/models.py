@@ -21,6 +21,10 @@ class Course(models.Model):
 
     def student_count(self):
         return CourseMember.objects.filter(course_id=self, roles='std').count()
+    def content_count(self):
+        return self.contents.count()
+    def comment_count(self):
+        return Comment.objects.filter(content_id__course_id=self).count()
 
     def __str__(self) -> str:
         return f"{self.name} : Rp{self.price:,}"
@@ -65,7 +69,7 @@ class CourseContent(models.Model):
 
 # TABLE COMMENT
 class Comment(models.Model):
-    content_id = models.ForeignKey(CourseContent, on_delete=models.CASCADE, verbose_name="konten", null=True, blank=True)
+    content_id = models.ForeignKey(CourseContent, on_delete=models.CASCADE, verbose_name="konten", null=True, blank=True, related_name='comments')
     member_id = models.ForeignKey(CourseMember, on_delete=models.CASCADE, verbose_name="pengguna", null=True, blank=True)
     
     comment = models.TextField('komentar')

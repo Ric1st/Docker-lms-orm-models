@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="container mt-5">
-    <div class="mb-5 py-3 bg-light border rounded-3 shadow-sm text-center">
-        <h1 class="fw-bold text-primary mb-0">Dashboard Kamu</h1>
-        <p class="text-secondary mt-2">Selamat datang di ruang belajar interaktifmu!</p>
+    <div class="mb-5 p-4 bg-primary rounded-3 shadow-sm">
+        <h1 class="fw-bold text-light mb-0"><i class="fa fa-home" aria-hidden="true"></i> Dashboard Kamu</h1>
+        <p class="mt-2">Selamat datang di ruang belajar interaktifmu! Keaktifan : {{ komen }} komentar diposting</p>
     </div>
 
     {% if not is_teacher %}
@@ -22,7 +22,7 @@
 
     <!-- Konten Course -->
     {% if is_teacher %}
-    <h4 class="mb-3">Kelas yang Anda Ajar / Kelola</h4>
+    <h4 class="mb-3">Kelas yang Anda Ajar / Kelola : {{ jumlah }}</h4>
     {% if courses %}
     <div class="row">
         {% for cm in courses %}
