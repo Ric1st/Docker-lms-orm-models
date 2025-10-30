@@ -25,6 +25,8 @@ class Course(models.Model):
         return self.contents.count()
     def comment_count(self):
         return Comment.objects.filter(content_id__course_id=self).count()
+    def content_count(self):
+        return CourseContent.objects.filter(course_id=self).count()
 
     def __str__(self) -> str:
         return f"{self.name} : Rp{self.price:,}"

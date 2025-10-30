@@ -18,6 +18,16 @@
                     <p>{{ course.description|linebreaks }}</p>
                 </div>
 
+                <div class="d-flex align-items-center mb-4 p-3 bg-info bg-opacity-10 border border-info rounded">
+                    <i class="fas fa-book-open fa-2x text-info me-3"></i>
+                    <div>
+                        <h4 class="mb-0 text-info">Total Materi:</h4>
+                        <p class="mb-0 fs-4 fw-bold text-dark">
+                            <span class="badge bg-info ms-2">Konten: {{ course.content_count }}</span>
+                        </p>
+                    </div>
+                </div>
+
                 <div class="d-flex justify-content-between align-items-center mt-5 p-3 border-top">
                     <h2 class="text-success fw-bold mb-0 display-6">
                         Rp{{ course.price|intcomma }}
