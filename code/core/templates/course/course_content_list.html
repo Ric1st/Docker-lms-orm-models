@@ -20,19 +20,19 @@
                         </li>
                     </ol>
                 </nav>
-
-                {% if owner %}
-                <a href="{% url 'course_content_add' course.pk %}"
-                    class="btn btn-success d-flex align-items-center gap-2 px-3 py-2">
-                    <i class="fas fa-plus"></i>
-                    <span>Tambah Konten</span>
-                </a>
-                <a href="{% url 'course_content_csv' course.pk %}"
-                    class="btn btn-success d-flex align-items-center gap-2 px-3 py-2">
-                    <i class="fas fa-plus"></i>
-                    <span>Import CSV</span>
-                </a>
-                {% endif %}
+                <div class="d-flex m-2 gap-2">
+                    {% if owner %} <a href="{% url 'course_content_add' course.pk %}"
+                        class="btn btn-success d-flex align-items-center gap-2 px-3 py-2">
+                        <i class="fas fa-plus"></i>
+                        <span>Tambah Konten</span>
+                    </a>
+                    <a href="{% url 'course_content_csv' course.pk %}"
+                        class="btn btn-primary d-flex align-items-center gap-2 px-3 py-2">
+                        <i class="fas fa-file-alt"></i>
+                        <span>Import CSV</span>
+                    </a>
+                    {% endif %}
+                </div>
             </div>
             <h1 class="display-5 fw-bold mb-4 text-primary">Materi: {{ course.name }}</h1>
 
@@ -118,7 +118,8 @@
                                 <i class="fas fa-users me-2"></i> Daftar Murid
                             </div>
                             <!-- Menggunakan variabel 'total' yang sudah Anda kurangi 1 di view -->
-                            <span class="badge bg-light text-dark rounded-pill fs-6">{{ total|default:0 }} Siswa</span>
+                            <span class="badge bg-light text-dark rounded-pill fs-6">{{ total|default:0 }}
+                                Siswa</span>
                         </div>
                         <ul class="list-group list-group-flush">
                             <!-- Iterasi pada student_list yang sudah dikirimkan dari view -->
