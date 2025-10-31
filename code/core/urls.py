@@ -35,6 +35,7 @@ urlpatterns = [
 
     #Course Content CRUD
     path('course/<int:course_pk>/contents/add/', views.content_create, name='course_content_add'),
+    path('course/<int:course_pk>/contents/csv/', views.content_import_csv, name='course_content_csv'),
     path('course/<int:course_pk>/content/<int:content_pk>/edit/', views.content_edit, name='course_content_edit'),
     path('course/<int:course_pk>/content/<int:content_pk>/delete/', views.content_delete, name='course_content_delete'),
     

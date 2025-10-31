@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+<!-- Memuat Bootstrap 5 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    xintegrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+<style>
+    /* Styling kustom untuk memperbaiki tampilan input file Bootstrap yang terkadang kurang intuitif */
+    .custom-file-input-label {
+        display: block;
+        cursor: pointer;
+        padding: 1.5rem 1rem;
+        border: 2px dashed #ced4da;
+        border-radius: 0.5rem;
+        text-align: center;
+        transition: border-color 0.2s, background-color 0.2s;
+    }
+
+    .custom-file-input-label:hover {
+        border-color: #0d6efd;
+        background-color: #f8f9fa;
+    }
+
+    /* Menyembunyikan input file bawaan */
+    .file-input-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        border: 0;
+    }
+
+    /* Style untuk icon di dalam box input file */
+    .icon-upload {
+        color: #6c757d;
+        width: 3rem;
+        height: 3rem;
+    }
+</style>
+{% endblock extra_head %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-7 col-md-9">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-header p-4 bg-primary-subtle">
+                    <h1 class="h3 fw-bold text-dark mb-2">Impor Konten Kursus</h1>
+                    <p class="text-muted">
+                        Unggah file CSV untuk menambahkan konten baru ke kursus:
+                        <span class="fw-semibold text-primary">{{ course.name }}</span>
+                    </p>
+                </div>
+                <div class="card-body p-4 p-md-5 bg-light">
+                    <!-- Pesan/Alert dari Django -->
+                    {% if messages %}
+                    <div class="mb-4">
+                        {% for message in messages %}
+                        <div class="alert alert-dismissible fade show {% if message.tags == 'error' %}alert-danger{% elif message.tags == 'success' %}alert-success{% else %}alert-info{% endif %}"
+                            role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <!-- Instruksi Format CSV (Menggunakan Alert Primary khas Bootstrap) -->
+                    <div class="alert alert-primary p-4 mb-4 border-start border-5 border-primary rounded-3">
+                        <h2 class="h5 fw-bold text-primary mb-3 d-flex align-items-center">
+                            <!-- Icon Bootstrap Icons (Anda mungkin perlu menyertakan CSS-nya, tapi kita pakai SVG inline agar mandiri) -->
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
+                                class="bi bi-file-earmark-spreadsheet me-2" viewBox="0 0 16 16">
+                                <path
+                                    d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5v2z" />
+                                <path d="M11 9H5v1h6V9zm0 3H5v1h6v-1zM7 5h2v1H7V5z" />
+                            </svg>
+                            Format File CSV yang Diperlukan
+                        </h2>
+                        <p class="text-primary-emphasis mb-3">File Anda harus berisi *Header* dan *data* sebagai berikut
+                            (dipisahkan koma):</p>
+                        <code class="d-block bg-primary-subtle text-primary-emphasis p-2 rounded overflow-auto small">
+                            name,description,video_url
+                        </code>
+                        <ul class="text-primary-emphasis mt-3 list-unstyled">
+                            <li><strong class="fw-medium">name</strong>: (Wajib) Nama atau judul konten.</li>
+                            <li><strong class="fw-medium">description</strong>: (Wajib) Deskripsi singkat konten.</li>
+                            <li><strong class="fw-medium">video_url</strong>: (Opsional) URL tautan video YouTube.
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Formulir Unggahan -->
+                    <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        {% csrf_token %}
+
+                        <div class="mb-4 text-center">
+                            <label for="csv_file_input" class="custom-file-input-label bg-light">
+                                <div class="d-flex flex-column align-items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor"
+                                        class="bi bi-cloud-upload icon-upload mb-2" viewBox="0 0 16 16">
+                                        <path fill-rule="evenodd"
+                                            d="M4.406 1.342A5.53 5.53 0 0 1 8 0c2.69 0 4.923 2 5.166 4.579C14.758 4.804 16 6.137 16 7.773 16 9.57 14.24 11 12.083 11H9.833V7.5a.5.5 0 0 0-1 0V11H4a3 3 0 1 1-.582-5.786 5.518 5.518 0 0 1 .588-2.607zM13 10.773c.772 0 1.455-.429 1.455-1.295 0-.745-.595-1.22-1.455-1.22H10.5V7.5a.5.5 0 0 0-.5-.5h-2a.5.5 0 0 0-.5.5V10.5H4a.5.5 0 0 0-.5.5c0 .6.35 1.127 1.05 1.343a.5.5 0 0 0 .15.014H13z" />
+                                    </svg>
+                                    <span id="file-name-display" class="fw-medium text-primary">Unggah file</span>
+                                    <p class="text-muted small mt-1 mb-0">atau seret dan lepas (Hanya file CSV yang
+                                        diterima)</p>
+                                </div>
+                                <input id="csv_file_input" name="csv_file" type="file" class="file-input-hidden"
+                                    accept=".csv" required>
+                            </label>
+                        </div>
+
+                        <!-- Tombol Aksi -->
+                        <div class="text-center">
+                            <!-- Tombol Kembali -->
+                            <!-- Pastikan ini menggunakan course.pk (nilai pk) sebagai argumen -->
+                            <a href="{% url 'course_content_list' course.pk %}"
+                                class="btn btn-outline-danger rounded-pill px-4">
+                                <i class="fas fa-sign-out-alt"></i>
+                                Batal
+                            </a>
+
+                            <!-- Tombol Submit -->
+                            <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                    class="bi bi-upload me-2" viewBox="0 0 16 16">
+                                    <path
+                                        d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z" />
+                                    <path
+                                        d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V10.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z" />
+                                </svg>
+                                Unggah dan Proses
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+<!-- Memuat Bootstrap 5 JS (untuk dismissible alert) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    xintegrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous">
+    </script>
+
+<script>
+    // Script untuk menampilkan nama file yang dipilih
+    document.getElementById('csv_file_input').addEventListener('change', function () {
+        const displaySpan = document.getElementById('file-name-display');
+        const fileName = this.files[0] ? this.files[0].name : 'Unggah file';
+
+        displaySpan.textContent = fileName;
+        if (this.files[0]) {
+            // Ubah warna teks menjadi lebih gelap setelah file dipilih
+            displaySpan.classList.remove('text-primary');
+            displaySpan.classList.add('text-success', 'fw-bold');
+            this.closest('label').style.borderColor = '#198754'; /* Warna success Bootstrap */
+        } else {
+            // Kembali ke default jika batal memilih
+            displaySpan.classList.remove('text-success', 'fw-bold');
+            displaySpan.classList.add('text-primary');
+            this.closest('label').style.borderColor = '#ced4da';
+        }
+    });
+</script>
+{% endblock extra_js %}

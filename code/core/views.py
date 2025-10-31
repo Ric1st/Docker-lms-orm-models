@@ -12,6 +12,7 @@ from django.contrib.auth import login
 # Import model-model yang diperlukan
 from .models import Course, CourseMember, CourseContent, Comment, Completion
 from .forms import UserEditForm, UserAddForm, RegisterForm, CourseForm, CourseContentForm
+from .importer import import_content_from_csv
 
 User = get_user_model()
 
@@ -652,3 +653,26 @@ def mark_content_complete(request, content_id):
         messages.info(request, f"Konten {content.name} sudah selesai sebelumnya.")
        
     return redirect('course_content_list', course_pk=content.course_id.id)
+
+
+# CSV 
+def content_import_csv(request, course_pk):
+    course = get_object_or_404(Course, pk=course_pk)
+    
+    if request.method == 'POST':
+        csv_file = request.FILES.get('csv_file')
+        if not csv_file:
+            messages.error(request, "Mohon unggah file CSV.")
+            return render(request, 'courseContent/upload_csv.html', {'course': course})
+        
+        success_count, error_message = import_content_from_csv(csv_file, course)
+        
+        if error_message:
+            messages.error(request, f"Import GAGAL TOTAL. Tidak ada konten yang ditambahkan. Detail kesalahan pertama: {error_message[:200]}...") 
+        else:
+            messages.success(request, f"Impor berhasil! Total {success_count} konten kursus baru telah ditambahkan.")
+            
+        return redirect('course_content_list', course_pk=course.pk)
+
+    context = {'course': course}
+    return render(request, 'courseContent/upload_csv.html', context)
