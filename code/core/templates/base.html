@@ -168,13 +168,13 @@
             <!-- Menu Item -->
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    {% if user.is_authenticated %}
                     <li class="nav-item">
                         <a class="nav-link {% if request.resolver_match.url_name == 'course_list' %}active{% endif %}"
                             href="{% url 'course_list' %}">
                             <i class="fas fa-book-open me-1"></i> Katalog Kursus
                         </a>
                     </li>
-                    {% if user.is_authenticated %}
                     <li class="nav-item">
                         <a class="nav-link {% if request.resolver_match.url_name == 'my_courses' %}active{% endif %}"
                             href="{% url 'my_courses' %}">
