@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
 from .views import CourseListView, CourseDetailView 
+from core.apiv1 import apiv1
 
 urlpatterns = [
     path('register/', views.register, name='register'),
@@ -46,4 +47,8 @@ urlpatterns = [
     #completion
     path('dashboard/', views.user_dashboard, name='dashboard'),
     path('content/<int:content_id>/complete/', views.mark_content_complete, name='mark_content_complete'),
+
+    # API
+    path('api/v1/', apiv1.urls),
+    path('api/v1/apihtml', views.apihtml),
 ]

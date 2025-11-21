@@ -676,3 +676,8 @@ def content_import_csv(request, course_pk):
 
     context = {'course': course}
     return render(request, 'courseContent/upload_csv.html', context)
+
+# API
+@login_required
+def apihtml(request):
+    return render(request, 'apihtml.html')
