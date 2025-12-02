@@ -1,9 +1,11 @@
+# apuv1.py
 from ninja import NinjaAPI, Schema
 from pydantic import field_validator
 import re
 from .models import User, CourseMember, CourseContent,Comment,Course
 from typing import List
 from typing import Optional
+# from .api import apiAuth
 
 apiv1 = NinjaAPI()
 
@@ -72,10 +74,6 @@ class UserOut(Schema):
 
 @apiv1.post('register/', response=UserOut)
 def register(request, data:Register):
-    """Endpoint untuk registrasi pengguna dengan validasi inputan:
-    - username: minimal terdiri dari 5 karakter
-    - password: minimal terdiri dari 8 karakter dan harus mengandung huruf dan angka
-    """
     newUser = User.objects.create_user(username=data.username,
                                 password=data.password,
                                 email=data.email,
@@ -134,6 +132,7 @@ def list_courses(request):
 class CourseMemberSchema(Schema):
     id: int
     user_id: int
+    course_id: int
     roles: str
    
 @apiv1.get("/members", response=List[CourseMemberSchema])
@@ -143,10 +142,50 @@ def list_members(request):
         {
             "id": m.id,
             "user_id": m.user_id.id,  
+            "course_id": m.course_id.id,  
             "roles": m.roles,
         }
         for m in members
     ]
+
+# kurang auth=apiAuth
+@apiv1.get('mycourses/', response=List[CourseMemberSchema])
+def getMyCourses(request):
+    user_id = User.objects.get(pk=request.user.id)
+    mycourses = CourseMember.objects.filter(user_id=user_id)\
+    .select_related('course_id', 'user_id')
+   
+    return [
+        {
+            "id": c.id, 
+            "user_id": c.user_id.id, 
+            "course_id": c.course_id.id, 
+            "roles": c.roles
+        } 
+        for c in mycourses
+    ]
+
+# kurang auth=apiAuth
+@apiv1.post('course/{id}/enroll/', response=CourseMemberSchema)
+def courseEnrollment(request, id:int):
+    user_id = User.objects.get(pk=request.user.id)
+
+    try:
+        course = Course.objects.get(pk=id)
+    except Course.DoesNotExist:
+        return {"status": "Course tidak ditemukan"}, 404
+      
+    if CourseMember.objects.filter(user_id=user_id, course_id=course).exists():
+         return {"status": "Anda sudah terdaftar di kursus ini."}, 400
+
+    enrollment = CourseMember.objects.create(user_id=user_id, course_id=course, roles='std') 
+  
+    return {
+        "id": enrollment.id,
+        "user_id": enrollment.user_id.id,
+        "course_id": enrollment.course_id.id,
+        "roles": enrollment.roles
+    }
 
 class CourseContentSchema(Schema):
     id: int
@@ -190,3 +229,29 @@ def list_comments(request):
         }
         for c in comments
     ]
+
+# kurang auth=apiAuth 
+@apiv1.post('komen/')
+def postComment(request, data:CommentSchema):
+    user = User.objects.get(pk=request.user.id)
+  
+    content = CourseContent.objects.filter(id=data.content_id).first()
+    if not content:
+        return {"status": "Content tidak ditemukan"}, 404
+      
+    coursemember = CourseMember.objects.filter(
+        user_id=user, 
+        course_id=content.course_id
+    ).first()
+  
+    if coursemember:
+        Comment.objects.create(
+            comment=data.comment, 
+            member_id=coursemember,  
+            content_id=content       
+        )
+        return {"status": "berhasil"}
+    else:
+        return {"status": "tidak boleh komentar di sini"}, 403
+    
+    # c_id = 4 | con_id = 4
