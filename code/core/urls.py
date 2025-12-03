@@ -2,6 +2,7 @@ from django.urls import path
 from . import views
 from .views import CourseListView, CourseDetailView 
 from core.apiv1 import apiv1
+from core.api import api
 
 urlpatterns = [
     path('register/', views.register, name='register'),
@@ -51,4 +52,5 @@ urlpatterns = [
     # API
     path('api/v1/', apiv1.urls),
     path('api/v1/apihtml', views.apihtml),
+    path('api/', api.urls),
 ]

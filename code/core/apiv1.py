@@ -5,7 +5,7 @@ import re
 from .models import User, CourseMember, CourseContent,Comment,Course
 from typing import List
 from typing import Optional
-# from .api import apiAuth
+from .api import apiAuth
 
 apiv1 = NinjaAPI()
 
@@ -149,10 +149,11 @@ def list_members(request):
     ]
 
 # kurang auth=apiAuth
-@apiv1.get('mycourses/', response=List[CourseMemberSchema])
+@apiv1.get('mycourses/',auth=apiAuth, response=List[CourseMemberSchema])
 def getMyCourses(request):
-    user_id = User.objects.get(pk=request.user.id)
-    mycourses = CourseMember.objects.filter(user_id=user_id)\
+    # user_id = User.objects.get(pk=request.user.id)
+    user = User.objects.first()
+    mycourses = CourseMember.objects.filter(user_id=user)\
     .select_related('course_id', 'user_id')
    
     return [
@@ -166,19 +167,20 @@ def getMyCourses(request):
     ]
 
 # kurang auth=apiAuth
-@apiv1.post('course/{id}/enroll/', response=CourseMemberSchema)
+@apiv1.post('course/{id}/enroll/',auth=apiAuth, response=CourseMemberSchema)
 def courseEnrollment(request, id:int):
-    user_id = User.objects.get(pk=request.user.id)
+    # user_id = User.objects.get(pk=request.user.id)
+    user = User.objects.first()
 
     try:
         course = Course.objects.get(pk=id)
     except Course.DoesNotExist:
         return {"status": "Course tidak ditemukan"}, 404
       
-    if CourseMember.objects.filter(user_id=user_id, course_id=course).exists():
+    if CourseMember.objects.filter(user_id=user, course_id=course).exists():
          return {"status": "Anda sudah terdaftar di kursus ini."}, 400
 
-    enrollment = CourseMember.objects.create(user_id=user_id, course_id=course, roles='std') 
+    enrollment = CourseMember.objects.create(user_id=user, course_id=course, roles='std') 
   
     return {
         "id": enrollment.id,
@@ -230,10 +232,15 @@ def list_comments(request):
         for c in comments
     ]
 
+class CommentIn(Schema):
+    content_id: int
+    comment: str
+
 # kurang auth=apiAuth 
-@apiv1.post('komen/')
-def postComment(request, data:CommentSchema):
-    user = User.objects.get(pk=request.user.id)
+@apiv1.post('komen/', auth=apiAuth )
+def postComment(request, data:CommentIn):
+    # user = User.objects.get(pk=request.user.id)
+    user = User.objects.first()
   
     content = CourseContent.objects.filter(id=data.content_id).first()
     if not content:
@@ -254,4 +261,3 @@ def postComment(request, data:CommentSchema):
     else:
         return {"status": "tidak boleh komentar di sini"}, 403
     
-    # c_id = 4 | con_id = 4
