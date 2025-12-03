@@ -5,24 +5,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard API Data</title>
-
-    <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 
 <body class="bg-light">
 
     <div class="container mt-5">
-        <h1>Test API</h1>
-        <!-- =============================== -->
+        <h1>Test API dengan Throttling</h1>
+        <div class="alert alert-info">
+            <strong>Info Throttling:</strong> Maksimal 10 requests per menit
+        </div>
+
         <!-- USERS TABLE -->
-        <!-- =============================== -->
         <div class="card shadow mb-5">
-            <div class="card-header bg-primary text-white">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                 <h4 class="mb-0">Daftar User</h4>
+                <span id="userCount" class="badge bg-light text-dark"></span>
             </div>
             <div class="card-body">
-
                 <div class="table-responsive">
                     <table class="table table-bordered table-striped">
                         <thead class="table-light">
@@ -41,19 +41,19 @@
                         </tbody>
                     </table>
                 </div>
-
+                <nav>
+                    <ul class="pagination justify-content-center" id="userPagination"></ul>
+                </nav>
             </div>
         </div>
 
-        <!-- =============================== -->
         <!-- COURSES TABLE -->
-        <!-- =============================== -->
         <div class="card shadow mb-5">
-            <div class="card-header bg-success text-white">
+            <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
                 <h4 class="mb-0">Daftar Kursus</h4>
+                <span id="courseCount" class="badge bg-light text-dark"></span>
             </div>
             <div class="card-body">
-
                 <div class="table-responsive">
                     <table class="table table-bordered table-striped">
                         <thead class="table-light">
@@ -72,48 +72,49 @@
                         </tbody>
                     </table>
                 </div>
-
+                <nav>
+                    <ul class="pagination justify-content-center" id="coursePagination"></ul>
+                </nav>
             </div>
         </div>
 
-        <!-- =============================== -->
         <!-- MEMBERS TABLE -->
-        <!-- =============================== -->
         <div class="card shadow mb-5">
-            <div class="card-header bg-info text-white">
+            <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
                 <h4 class="mb-0">Daftar Member</h4>
+                <span id="memberCount" class="badge bg-light text-dark"></span>
             </div>
             <div class="card-body">
-
                 <div class="table-responsive">
                     <table class="table table-bordered table-striped">
                         <thead class="table-light">
                             <tr>
                                 <th>ID</th>
                                 <th>User ID</th>
+                                <th>Course ID</th>
                                 <th>Roles</th>
                             </tr>
                         </thead>
                         <tbody id="memberTableBody">
                             <tr>
-                                <td colspan="3" class="text-center">Memuat data...</td>
+                                <td colspan="4" class="text-center">Memuat data...</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
-
+                <nav>
+                    <ul class="pagination justify-content-center" id="memberPagination"></ul>
+                </nav>
             </div>
         </div>
 
-        <!-- =============================== -->
         <!-- CONTENTS TABLE -->
-        <!-- =============================== -->
         <div class="card shadow mb-5">
-            <div class="card-header bg-warning text-white">
+            <div class="card-header bg-warning text-white d-flex justify-content-between align-items-center">
                 <h4 class="mb-0">Daftar Konten Kursus</h4>
+                <span id="contentCount" class="badge bg-light text-dark"></span>
             </div>
             <div class="card-body">
-
                 <div class="table-responsive">
                     <table class="table table-bordered table-striped">
                         <thead class="table-light">
@@ -133,19 +134,19 @@
                         </tbody>
                     </table>
                 </div>
-
+                <nav>
+                    <ul class="pagination justify-content-center" id="contentPagination"></ul>
+                </nav>
             </div>
         </div>
 
-        <!-- =============================== -->
         <!-- COMMENTS TABLE -->
-        <!-- =============================== -->
         <div class="card shadow mb-5">
-            <div class="card-header bg-secondary text-white">
+            <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
                 <h4 class="mb-0">Komentar</h4>
+                <span id="commentCount" class="badge bg-light text-dark"></span>
             </div>
             <div class="card-body">
-
                 <div class="table-responsive">
                     <table class="table table-bordered table-striped">
                         <thead class="table-light">
@@ -163,31 +164,90 @@
                         </tbody>
                     </table>
                 </div>
-
+                <nav>
+                    <ul class="pagination justify-content-center" id="commentPagination"></ul>
+                </nav>
             </div>
         </div>
 
     </div>
 
-    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- ============================================= -->
-    <!-- FETCH DATA JAVASCRIPT -->
-    <!-- ============================================= -->
     <script>
-        // ================= USERS =================
-        async function loadUsers() {
-            try {
-                const res = await fetch("/api/v1/users");
-                const data = await res.json();
+        const ITEMS_PER_PAGE = 5;
 
-                data.sort((a, b) => a.id - b.id); // Sort ASC
+        // Generic pagination function
+        function paginate(data, page = 1) {
+            const start = (page - 1) * ITEMS_PER_PAGE;
+            const end = start + ITEMS_PER_PAGE;
+            return {
+                data: data.slice(start, end),
+                totalPages: Math.ceil(data.length / ITEMS_PER_PAGE),
+                currentPage: page,
+                total: data.length
+            };
+        }
+
+        // Generic pagination UI
+        function renderPagination(containerId, currentPage, totalPages, onPageChange) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+
+            if (totalPages <= 1) return;
+
+            // Previous button
+            const prevLi = document.createElement('li');
+            prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+            prevLi.innerHTML = `<a class="page-link" href="#">Previous</a>`;
+            prevLi.onclick = (e) => {
+                e.preventDefault();
+                if (currentPage > 1) onPageChange(currentPage - 1);
+            };
+            container.appendChild(prevLi);
+
+            // Page numbers
+            for (let i = 1; i <= totalPages; i++) {
+                const li = document.createElement('li');
+                li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+                li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+                li.onclick = (e) => {
+                    e.preventDefault();
+                    onPageChange(i);
+                };
+                container.appendChild(li);
+            }
+
+            // Next button
+            const nextLi = document.createElement('li');
+            nextLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+            nextLi.innerHTML = `<a class="page-link" href="#">Next</a>`;
+            nextLi.onclick = (e) => {
+                e.preventDefault();
+                if (currentPage < totalPages) onPageChange(currentPage + 1);
+            };
+            container.appendChild(nextLi);
+        }
+
+        // USERS
+        let usersData = [];
+        let usersCurrentPage = 1;
+
+        async function loadUsers(page = 1) {
+            try {
+                if (usersData.length === 0) {
+                    const res = await fetch("/api/v1/users");
+                    const data = await res.json();
+                    usersData = (data.items || data).sort((a, b) => a.id - b.id);
+                }
+
+                const paginated = paginate(usersData, page);
+                usersCurrentPage = page;
 
                 const body = document.getElementById("userTableBody");
                 body.innerHTML = "";
 
-                data.forEach(u => {
+                paginated.data.forEach(u => {
                     body.insertAdjacentHTML("beforeend", `
                         <tr>
                             <td>${u.id}</td>
@@ -198,99 +258,148 @@
                         </tr>
                     `);
                 });
-            } catch {
+
+                document.getElementById("userCount").textContent = `Total: ${paginated.total}`;
+                renderPagination('userPagination', paginated.currentPage, paginated.totalPages, loadUsers);
+            } catch (error) {
                 document.getElementById("userTableBody").innerHTML =
-                    `<tr><td colspan="5" class="text-center text-danger">Gagal memuat data</td></tr>`;
+                    `<tr><td colspan="5" class="text-center text-danger">${error.message}</td></tr>`;
             }
         }
 
-        // ================= COURSES =================
-        async function loadCourses() {
+        // COURSES
+        let coursesData = [];
+        let coursesCurrentPage = 1;
+
+        async function loadCourses(page = 1) {
             try {
-                const res = await fetch("/api/v1/courses");
-                const data = await res.json();
+                if (coursesData.length === 0) {
+                    const res = await fetch("/api/v1/courses-public/");
+                    const data = await res.json();
+                    coursesData = data;
+                }
+
+                const paginated = paginate(coursesData, page);
+                coursesCurrentPage = page;
 
                 const body = document.getElementById("courseTableBody");
                 body.innerHTML = "";
 
-                data.forEach(c => {
+                paginated.data.forEach(c => {
                     body.insertAdjacentHTML("beforeend", `
                         <tr>
                             <td>${c.id}</td>
                             <td>${c.name}</td>
                             <td>${c.description}</td>
                             <td>${c.price}</td>
-                            <td>${c.teacher}</td>
+                            <td>${c.teacher || '-'}</td>
                         </tr>
                     `);
                 });
-            } catch {
+
+                document.getElementById("courseCount").textContent = `Total: ${paginated.total}`;
+                renderPagination('coursePagination', paginated.currentPage, paginated.totalPages, loadCourses);
+            } catch (error) {
                 document.getElementById("courseTableBody").innerHTML =
-                    `<tr><td colspan="5" class="text-center text-danger">Gagal memuat data</td></tr>`;
+                    `<tr><td colspan="5" class="text-center text-danger">${error.message}</td></tr>`;
             }
         }
 
-        // ================= MEMBERS =================
-        async function loadMembers() {
+        // MEMBERS
+        let membersData = [];
+        let membersCurrentPage = 1;
+
+        async function loadMembers(page = 1) {
             try {
-                const res = await fetch("/api/v1/members");
-                const data = await res.json();
+                if (membersData.length === 0) {
+                    const res = await fetch("/api/v1/members");
+                    const data = await res.json();
+                    membersData = data;
+                }
+
+                const paginated = paginate(membersData, page);
+                membersCurrentPage = page;
 
                 const body = document.getElementById("memberTableBody");
                 body.innerHTML = "";
 
-                data.forEach(m => {
+                paginated.data.forEach(m => {
                     body.insertAdjacentHTML("beforeend", `
                         <tr>
                             <td>${m.id}</td>
                             <td>${m.user_id}</td>
+                            <td>${m.course_id}</td>
                             <td>${m.roles}</td>
                         </tr>
                     `);
                 });
-            } catch {
+
+                document.getElementById("memberCount").textContent = `Total: ${paginated.total}`;
+                renderPagination('memberPagination', paginated.currentPage, paginated.totalPages, loadMembers);
+            } catch (error) {
                 document.getElementById("memberTableBody").innerHTML =
-                    `<tr><td colspan="3" class="text-center text-danger">Gagal memuat data</td></tr>`;
+                    `<tr><td colspan="4" class="text-center text-danger">${error.message}</td></tr>`;
             }
         }
 
-        // ================= CONTENTS =================
-        async function loadContents() {
+        // CONTENTS
+        let contentsData = [];
+        let contentsCurrentPage = 1;
+
+        async function loadContents(page = 1) {
             try {
-                const res = await fetch("/api/v1/contents");
-                const data = await res.json();
+                if (contentsData.length === 0) {
+                    const res = await fetch("/api/v1/contents");
+                    const data = await res.json();
+                    contentsData = data;
+                }
+
+                const paginated = paginate(contentsData, page);
+                contentsCurrentPage = page;
 
                 const body = document.getElementById("contentTableBody");
                 body.innerHTML = "";
 
-                data.forEach(c => {
+                paginated.data.forEach(c => {
                     body.insertAdjacentHTML("beforeend", `
                         <tr>
                             <td>${c.id}</td>
                             <td>${c.course_id}</td>
                             <td>${c.name}</td>
                             <td>${c.description}</td>
-                            <td>${c.video_url}</td>
+                            <td><a href="${c.video_url}" target="_blank">Link</a></td>
                             <td>${c.file_attachment ?? "-"}</td>
                         </tr>
                     `);
                 });
-            } catch {
+
+                document.getElementById("contentCount").textContent = `Total: ${paginated.total}`;
+                renderPagination('contentPagination', paginated.currentPage, paginated.totalPages, loadContents);
+            } catch (error) {
                 document.getElementById("contentTableBody").innerHTML =
-                    `<tr><td colspan="6" class="text-center text-danger">Gagal memuat data</td></tr>`;
+                    `<tr><td colspan="6" class="text-center text-danger">${error.message}</td></tr>`;
             }
         }
 
-        // ================= COMMENTS =================
-        async function loadComments() {
+        // COMMENTS
+        let commentsData = [];
+        let commentsCurrentPage = 1;
+
+        async function loadComments(page = 1) {
             try {
-                const res = await fetch("/api/v1/comments");
-                const data = await res.json();
+                if (commentsData.length === 0) {
+                    const res = await fetch("/api/v1/comments");
+                    const data = await res.json();
+                    commentsData = data;
+                }
+
+                const paginated = paginate(commentsData, page);
+                commentsCurrentPage = page;
 
                 const body = document.getElementById("commentTableBody");
                 body.innerHTML = "";
 
-                data.forEach(c => {
+                paginated.data.forEach(c => {
                     body.insertAdjacentHTML("beforeend", `
                         <tr>
                             <td>${c.id}</td>
@@ -300,13 +409,16 @@
                         </tr>
                     `);
                 });
-            } catch {
+
+                document.getElementById("commentCount").textContent = `Total: ${paginated.total}`;
+                renderPagination('commentPagination', paginated.currentPage, paginated.totalPages, loadComments);
+            } catch (error) {
                 document.getElementById("commentTableBody").innerHTML =
-                    `<tr><td colspan="4" class="text-center text-danger">Gagal memuat data</td></tr>`;
+                    `<tr><td colspan="4" class="text-center text-danger">${error.message}</td></tr>`;
             }
         }
 
-        // ================= LOAD ALL ON PAGE LOAD =================
+        // Load all data
         loadUsers();
         loadCourses();
         loadMembers();

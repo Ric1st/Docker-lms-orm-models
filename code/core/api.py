@@ -7,6 +7,6 @@ class AuthBearer(HttpBearer):
     def authenticate(self, request, token):
         return token
 
-api = NinjaAPI()
+api = NinjaAPI(urls_namespace='auth-api')
 api.add_router("/auth/", mobile_auth_router)
 apiAuth = AuthBearer()

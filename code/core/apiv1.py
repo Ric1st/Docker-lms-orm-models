@@ -1,13 +1,24 @@
-# apuv1.py
-from ninja import NinjaAPI, Schema
+# apiv1.py
+from ninja import NinjaAPI, Schema, Query, Field, FilterSchema
+from ninja.pagination import paginate, PageNumberPagination
+from ninja.throttling import AnonRateThrottle, AuthRateThrottle
 from pydantic import field_validator
+from django.db.models import Count, Q
+from datetime import datetime
+from typing import List, Optional
 import re
-from .models import User, CourseMember, CourseContent,Comment,Course
-from typing import List
-from typing import Optional
+
+from .models import User, CourseMember, CourseContent, Comment, Course
 from .api import apiAuth
 
-apiv1 = NinjaAPI()
+# Inisialisasi API dengan throttling global
+apiv1 = NinjaAPI(
+    urls_namespace='apiv1',
+    throttle=[
+        AnonRateThrottle('10/m'),  
+        AuthRateThrottle('10/m'),
+    ],
+)
 
 @apiv1.get('/hello')
 def helloApi(request):
@@ -54,9 +65,18 @@ class Kalkulator(Schema):
                 'operator': self.opr, 'hasil': self.hasil}
 
 @apiv1.post('calc')
-def postCalc(request, skim : Kalkulator):
+def postCalc(request, skim: Kalkulator):
     skim.hasil = skim.calcHasil()
     return skim
+
+# ============= USER & REGISTER SCHEMAS ============= 
+# PENTING: Definisikan UserOut SEBELUM digunakan!
+class UserOut(Schema):
+    id: int
+    username: str
+    first_name: str
+    last_name: str
+    email: str
 
 class Register(Schema):
     username: str
@@ -65,26 +85,10 @@ class Register(Schema):
     first_name: str
     last_name: str
 
-class UserOut(Schema):
-    id: int
-    username: str
-    first_name: str
-    last_name: str
-    email: str
-
-@apiv1.post('register/', response=UserOut)
-def register(request, data:Register):
-    newUser = User.objects.create_user(username=data.username,
-                                password=data.password,
-                                email=data.email,
-                                first_name=data.first_name,
-                                last_name=data.last_name)
-    return newUser
-
     @field_validator("username")
     def validate_username(cls, value):
         if len(value) < 5:
-            raise ValueError("Username harus lebih dari 3 karakter")
+            raise ValueError("Username harus lebih dari 5 karakter")
         return value
 
     @field_validator('password')
@@ -95,7 +99,20 @@ def register(request, data:Register):
         pattern = r'^(?=.*[A-Za-z])(?=.*\d).+$'
         if not re.match(pattern, value):
             raise ValueError("Password harus mengandung huruf dan angka")
+        return value
 
+@apiv1.post('register/', response=UserOut)
+def register(request, data: Register):
+    newUser = User.objects.create_user(
+        username=data.username,
+        password=data.password,
+        email=data.email,
+        first_name=data.first_name,
+        last_name=data.last_name
+    )
+    return newUser
+
+# ============= USER ENDPOINTS =============
 class UserSchema(Schema):
     id: int
     username: str
@@ -103,10 +120,34 @@ class UserSchema(Schema):
     last_name: str
     email: str
 
+# GET users 
 @apiv1.get("/users", response=List[UserSchema])
+@paginate(PageNumberPagination, page_size=10)
 def list_users(request):
     users = User.objects.all()
     return users
+
+# ... (sisanya sama seperti sebelumnya)
+
+# ============= COURSE FILTER & SCHEMAS =============
+class CourseFilter(FilterSchema):
+    price_gte: Optional[int] = 0
+    price_lte: Optional[int] = 0
+    created_gte: Optional[datetime] = None
+    created_lte: Optional[datetime] = None
+    search: Optional[str] = Field(None, q=['name__icontains', 'description__icontains'])
+
+    def filter_price_gte(self, value: int):
+        return Q(price__gte=value) if value else Q()
+
+    def filter_price_lte(self, value: int):
+        return Q(price__lte=value) if value else Q()
+
+    def filter_created_gte(self, value: datetime):
+        return Q(created_at__gte=value) if value else Q()
+
+    def filter_created_lte(self, value: datetime):
+        return Q(created_at__lte=value) if value else Q()
 
 class CourseSchema(Schema):
     id: int
@@ -115,13 +156,23 @@ class CourseSchema(Schema):
     price: int
     teacher: int
 
-@apiv1.get("/courses", response=List[CourseSchema])
-def list_courses(request):
+class DetailCourseOut(Schema):
+    id: int
+    name: str
+    description: str
+    price: int
+    teacher: int
+    num_members: int
+    num_contents: int
+
+# GET courses without auth for public access (untuk HTML dashboard)
+@apiv1.get('courses-public/', response=List[CourseSchema])
+def listPublicCourses(request):
     courses = Course.objects.all()
     return [
         {
             "id": c.id,
-            "name": c.name,  
+            "name": c.name,
             "description": c.description,
             "price": c.price,
             "teacher": c.teacher.id if c.teacher else None
@@ -129,47 +180,67 @@ def list_courses(request):
         for c in courses
     ]
 
+# GET courses with auth, filter, and pagination
+@apiv1.get('courses/', response=List[DetailCourseOut], auth=apiAuth)
+@paginate(PageNumberPagination, page_size=5)
+def listAllCourse(request, filters: CourseFilter = Query(...)):
+    courses = Course.objects.all()
+    courses = filters.filter(courses)
+    
+    # Annotate each course with the number of members and contents
+    courses = courses.annotate(
+        num_members=Count('coursemember'),
+        num_contents=Count('coursecontent')
+    )
+    
+    return courses
+
+# ============= COURSE MEMBER ENDPOINTS =============
 class CourseMemberSchema(Schema):
     id: int
     user_id: int
     course_id: int
     roles: str
-   
+
+class CourseMemberOut(Schema):
+    id: int
+    user_id: int
+    course_id: int
+    course_name: str
+    roles: str
+
 @apiv1.get("/members", response=List[CourseMemberSchema])
 def list_members(request):
     members = CourseMember.objects.all()
     return [
         {
             "id": m.id,
-            "user_id": m.user_id.id,  
-            "course_id": m.course_id.id,  
+            "user_id": m.user_id.id,
+            "course_id": m.course_id.id,
             "roles": m.roles,
         }
         for m in members
     ]
 
-# kurang auth=apiAuth
-@apiv1.get('mycourses/',auth=apiAuth, response=List[CourseMemberSchema])
+@apiv1.get('mycourses/', auth=apiAuth, response=List[CourseMemberOut])
 def getMyCourses(request):
-    # user_id = User.objects.get(pk=request.user.id)
     user = User.objects.first()
     mycourses = CourseMember.objects.filter(user_id=user)\
-    .select_related('course_id', 'user_id')
+        .select_related('course_id', 'user_id')
    
     return [
         {
-            "id": c.id, 
-            "user_id": c.user_id.id, 
-            "course_id": c.course_id.id, 
+            "id": c.id,
+            "user_id": c.user_id.id,
+            "course_id": c.course_id.id,
+            "course_name": c.course_id.name,
             "roles": c.roles
-        } 
+        }
         for c in mycourses
     ]
 
-# kurang auth=apiAuth
-@apiv1.post('course/{id}/enroll/',auth=apiAuth, response=CourseMemberSchema)
-def courseEnrollment(request, id:int):
-    # user_id = User.objects.get(pk=request.user.id)
+@apiv1.post('course/{id}/enroll/', auth=apiAuth, response=CourseMemberSchema)
+def courseEnrollment(request, id: int):
     user = User.objects.first()
 
     try:
@@ -178,9 +249,13 @@ def courseEnrollment(request, id:int):
         return {"status": "Course tidak ditemukan"}, 404
       
     if CourseMember.objects.filter(user_id=user, course_id=course).exists():
-         return {"status": "Anda sudah terdaftar di kursus ini."}, 400
+        return {"status": "Anda sudah terdaftar di kursus ini."}, 400
 
-    enrollment = CourseMember.objects.create(user_id=user, course_id=course, roles='std') 
+    enrollment = CourseMember.objects.create(
+        user_id=user, 
+        course_id=course, 
+        roles='std'
+    )
   
     return {
         "id": enrollment.id,
@@ -189,6 +264,7 @@ def courseEnrollment(request, id:int):
         "roles": enrollment.roles
     }
 
+# ============= COURSE CONTENT ENDPOINTS =============
 class CourseContentSchema(Schema):
     id: int
     course_id: int
@@ -196,50 +272,48 @@ class CourseContentSchema(Schema):
     description: str
     video_url: str
     file_attachment: Optional[str] = None
-   
+
 @apiv1.get("/contents", response=List[CourseContentSchema])
 def list_contents(request):
     contents = CourseContent.objects.all()
     return [
         {
             "id": c.id,
-            "course_id": c.course_id.id,  
+            "course_id": c.course_id.id,
             "name": c.name,
             "description": c.description,
             "video_url": c.video_url,
-            "file_attachment": c.file_attachment 
+            "file_attachment": c.file_attachment
         }
         for c in contents
     ]
 
+# ============= COMMENT ENDPOINTS =============
 class CommentSchema(Schema):
     id: int
     content_id: int
     member_id: int
     comment: str
-   
+
+class CommentIn(Schema):
+    content_id: int
+    comment: str
+
 @apiv1.get("/comments", response=List[CommentSchema])
 def list_comments(request):
     comments = Comment.objects.all()
     return [
         {
             "id": c.id,
-            "content_id": c.content_id.id,  
+            "content_id": c.content_id.id,
             "member_id": c.member_id.id,
             "comment": c.comment,
-           
         }
         for c in comments
     ]
 
-class CommentIn(Schema):
-    content_id: int
-    comment: str
-
-# kurang auth=apiAuth 
-@apiv1.post('komen/', auth=apiAuth )
-def postComment(request, data:CommentIn):
-    # user = User.objects.get(pk=request.user.id)
+@apiv1.post('comments/', auth=apiAuth)
+def postComment(request, data: CommentIn):
     user = User.objects.first()
   
     content = CourseContent.objects.filter(id=data.content_id).first()
@@ -254,10 +328,9 @@ def postComment(request, data:CommentIn):
     if coursemember:
         Comment.objects.create(
             comment=data.comment, 
-            member_id=coursemember,  
-            content_id=content       
+            member_id=coursemember,
+            content_id=content
         )
         return {"status": "berhasil"}
     else:
         return {"status": "tidak boleh komentar di sini"}, 403
-    
