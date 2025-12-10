@@ -78,14 +78,13 @@ WSGI_APPLICATION = 'lms_project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'lms_db',
-        'USER': 'lms_user',
-        'PASSWORD': 'lms_password',
-        'HOST': 'postgres', 
-        'PORT': '5432',
+        'NAME': 'railway',
+        'USER': 'postgres',
+        'PASSWORD': 'KNDWwxNorEUavPOznjVLwMBXlPBqxpWK',
+        'HOST': 'trolley.proxy.rlwy.net', 
+        'PORT': '50095',
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
