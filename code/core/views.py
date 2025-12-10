@@ -8,6 +8,7 @@ from django.db.models import Q, Count
 from django.core.files.storage import FileSystemStorage 
 from django.contrib.auth import get_user_model
 from django.contrib.auth import login
+import requests
 
 # Import model-model yang diperlukan
 from .models import Course, CourseMember, CourseContent, Comment, Completion
@@ -65,10 +66,70 @@ def core(request):
 
 # --- VIEWS USER MANAGEMENT (CRUD & SEARCH) ---
 
-@user_passes_test(is_staff_or_superuser)
+@user_passes_test(lambda u: u.is_staff or u.is_superuser)
 @login_required
 def users(request):
     query = request.GET.get('q')
+    page_number = request.GET.get('page', 1)
+    
+    try:
+        api_base_url = f"{request.scheme}://{request.get_host()}/api/v1"
+        
+        params = {'page': page_number}
+        if query:
+            params['search'] = query
+        
+        response = requests.get(
+            f"{api_base_url}/users",
+            params=params,
+            timeout=5 
+        )
+        
+        if response.status_code == 200:
+            api_data = response.json()
+            
+            myusers_list = api_data.get('items', [])
+            if not myusers_list and 'results' in api_data:
+                myusers_list = api_data.get('results', [])
+            
+            total_count = api_data.get('count', len(myusers_list))
+            
+            paginator = Paginator(myusers_list, 5)
+            
+            try:
+                page_obj = paginator.page(page_number)
+            except PageNotAnInteger:
+                page_obj = paginator.page(1)
+            except EmptyPage:
+                page_obj = paginator.page(paginator.num_pages)
+                
+            message = f"Menampilkan hasil pencarian untuk: '{query}'" if query else ""
+            
+            stats = get_stats_from_database()
+            
+            context = {
+                'myusers': page_obj,
+                'page_obj': page_obj,
+                'query': query,
+                'search_message': message,
+                'total_users': total_count,
+                'admin': stats['admin'],
+                'staff': stats['staff'],
+                'siswa': stats['siswa'],
+                'teacher': stats['teacher'],
+                'rata2': stats['rata2'],
+            }
+            
+            return render(request, 'user/all_users.html', context)
+        else:
+            return users_from_database(request, query)
+            
+    except (requests.RequestException, requests.Timeout, KeyError, ValueError) as e:
+        print(f"API Error: {e}")  
+        return users_from_database(request, query)
+
+def users_from_database(request, query=None):
+    """Ambil data user langsung dari database (fallback)"""
     if query:
         myusers = User.objects.filter(
             Q(username__icontains=query) |
@@ -80,32 +141,53 @@ def users(request):
     else:
         myusers = User.objects.all().order_by('date_joined')
         message = ""
-
-    admin = User.objects.filter(is_superuser=True).count()
-    staff = User.objects.filter(is_staff=True).count()
-    siswa = User.objects.filter(is_staff=False, is_superuser = False).count()
-    teacher = User.objects.filter(course__isnull=False).distinct().count()
-    Tcourse = CourseMember.objects.values('course_id').distinct().count()
-    Tmember = CourseMember.objects.filter(roles = 'std').values('user_id').distinct().count()
-    rata2 = Tcourse/Tmember
-
-    paginator = Paginator(myusers, 5) 
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    
+    # Hitung statistik
+    stats = get_stats_from_database()
+    
+    paginator = Paginator(myusers, 5)
+    page_number = request.GET.get('page', 1)
+    
+    try:
+        page_obj = paginator.page(page_number)
+    except PageNotAnInteger:
+        page_obj = paginator.page(1)
+    except EmptyPage:
+        page_obj = paginator.page(paginator.num_pages)
     
     context = {
         'myusers': page_obj,
         'page_obj': page_obj,
         'query': query,
         'search_message': message,
-        'total_users': User.objects.all().count(),
+        'total_users': User.objects.count(),
+        'admin': stats['admin'],
+        'staff': stats['staff'],
+        'siswa': stats['siswa'],
+        'teacher': stats['teacher'],
+        'rata2': stats['rata2'],
+    }
+    
+    return render(request, 'user/all_users.html', context)
+
+def get_stats_from_database():
+    """Ambil statistik dari database"""
+    admin = User.objects.filter(is_superuser=True).count()
+    staff = User.objects.filter(is_staff=True).count()
+    siswa = User.objects.filter(is_staff=False, is_superuser=False).count()
+    teacher = User.objects.filter(course__isnull=False).distinct().count()
+    Tcourse = CourseMember.objects.values('course_id').distinct().count()
+    Tmember = CourseMember.objects.filter(roles='std').values('user_id').distinct().count()
+    rata2 = Tcourse / Tmember if Tmember > 0 else 0
+    
+    return {
         'admin': admin,
         'staff': staff,
         'siswa': siswa,
         'teacher': teacher,
         'rata2': rata2,
+        'total_users': User.objects.count()
     }
-    return render(request, 'user/all_users.html', context)
 
 @user_passes_test(is_staff_or_superuser)
 @login_required

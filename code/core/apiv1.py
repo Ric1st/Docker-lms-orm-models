@@ -127,9 +127,18 @@ class UserSchema(Schema):
 # GET users 
 @apiv1.get("/users", response=List[UserSchema])
 @paginate(PageNumberPagination, page_size=10)
-def list_users(request):
+def list_users(request, search: Optional[str] = Query(None)):
     users = User.objects.all()
-    return users
+    
+    if search:
+        users = users.filter(
+            Q(username__icontains=search) |
+            Q(first_name__icontains=search) |
+            Q(last_name__icontains=search) |
+            Q(email__icontains=search)
+        ).distinct()
+    
+    return users.order_by('date_joined')
 
 # ... (sisanya sama seperti sebelumnya)
 
