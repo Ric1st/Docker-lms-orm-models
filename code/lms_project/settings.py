@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.humanize',
     'core',
-    'ninja_simple_jwt',
+    # 'ninja_simple_jwt',
 ]
 
 MIDDLEWARE = [

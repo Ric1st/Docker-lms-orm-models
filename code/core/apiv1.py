@@ -7,6 +7,7 @@ from django.db.models import Count, Q
 from datetime import datetime
 from typing import List, Optional
 import re
+from ninja.responses import Response
 
 from .models import User, CourseMember, CourseContent, Comment, Course
 from .api import apiAuth
@@ -103,6 +104,9 @@ class Register(Schema):
 
 @apiv1.post('register/', response=UserOut)
 def register(request, data: Register):
+    if User.objects.filter(username=data.username).exists():
+        return Response({"status": "Username sudah digunakan."}, status=400)
+    
     newUser = User.objects.create_user(
         username=data.username,
         password=data.password,

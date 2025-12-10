@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard API Data</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
 </head>
 
 <body class="bg-light">
@@ -237,6 +238,27 @@
             try {
                 if (usersData.length === 0) {
                     const res = await fetch("/api/v1/users");
+
+                    // Check for throttling
+                    if (res.status === 429) {
+                        const errorData = await res.json();
+                        const body = document.getElementById("userTableBody");
+                        body.innerHTML = `
+                            <tr>
+                                <td colspan="5" class="text-center text-warning">
+                                    <i class="bi bi-exclamation-triangle-fill fs-2"></i><br>
+                                    <strong>TOO MANY REQUESTS!</strong><br>
+                                    <small>${errorData.detail || 'Throttling limit exceeded. Please wait a moment and try again.'}</small>
+                                </td>
+                            </tr>`;
+                        document.getElementById("userCount").textContent = 'Throttled';
+                        return;
+                    }
+
+                    if (!res.ok) {
+                        throw new Error(`HTTP Error: ${res.status}`);
+                    }
+
                     const data = await res.json();
                     usersData = (data.items || data).sort((a, b) => a.id - b.id);
                 }
@@ -252,8 +274,8 @@
                         <tr>
                             <td>${u.id}</td>
                             <td>${u.username}</td>
-                            <td>${u.first_name}</td>
-                            <td>${u.last_name}</td>
+                            <td>${u.first_name || '-'}</td>
+                            <td>${u.last_name || '-'}</td>
                             <td>${u.email}</td>
                         </tr>
                     `);
@@ -263,7 +285,10 @@
                 renderPagination('userPagination', paginated.currentPage, paginated.totalPages, loadUsers);
             } catch (error) {
                 document.getElementById("userTableBody").innerHTML =
-                    `<tr><td colspan="5" class="text-center text-danger">${error.message}</td></tr>`;
+                    `<tr><td colspan="5" class="text-center text-danger">
+                        <i class="bi bi-x-circle-fill fs-2"></i><br>
+                        Error: ${error.message}
+                    </td></tr>`;
             }
         }
 
@@ -275,6 +300,27 @@
             try {
                 if (coursesData.length === 0) {
                     const res = await fetch("/api/v1/courses-public/");
+
+                    // Check for throttling
+                    if (res.status === 429) {
+                        const errorData = await res.json();
+                        const body = document.getElementById("courseTableBody");
+                        body.innerHTML = `
+                            <tr>
+                                <td colspan="5" class="text-center text-warning">
+                                    <i class="bi bi-exclamation-triangle-fill fs-2"></i><br>
+                                    <strong>TOO MANY REQUESTS!</strong><br>
+                                    <small>${errorData.detail || 'Throttling limit exceeded. Please wait a moment and try again.'}</small>
+                                </td>
+                            </tr>`;
+                        document.getElementById("courseCount").textContent = 'Throttled';
+                        return;
+                    }
+
+                    if (!res.ok) {
+                        throw new Error(`HTTP Error: ${res.status}`);
+                    }
+
                     const data = await res.json();
                     coursesData = data;
                 }
@@ -291,7 +337,7 @@
                             <td>${c.id}</td>
                             <td>${c.name}</td>
                             <td>${c.description}</td>
-                            <td>${c.price}</td>
+                            <td>Rp ${c.price.toLocaleString('id-ID')}</td>
                             <td>${c.teacher || '-'}</td>
                         </tr>
                     `);
@@ -301,7 +347,10 @@
                 renderPagination('coursePagination', paginated.currentPage, paginated.totalPages, loadCourses);
             } catch (error) {
                 document.getElementById("courseTableBody").innerHTML =
-                    `<tr><td colspan="5" class="text-center text-danger">${error.message}</td></tr>`;
+                    `<tr><td colspan="5" class="text-center text-danger">
+                        <i class="bi bi-x-circle-fill fs-2"></i><br>
+                        Error: ${error.message}
+                    </td></tr>`;
             }
         }
 
@@ -313,6 +362,27 @@
             try {
                 if (membersData.length === 0) {
                     const res = await fetch("/api/v1/members");
+
+                    // Check for throttling
+                    if (res.status === 429) {
+                        const errorData = await res.json();
+                        const body = document.getElementById("memberTableBody");
+                        body.innerHTML = `
+                            <tr>
+                                <td colspan="4" class="text-center text-warning">
+                                    <i class="bi bi-exclamation-triangle-fill fs-2"></i><br>
+                                    <strong>TOO MANY REQUESTS!</strong><br>
+                                    <small>${errorData.detail || 'Throttling limit exceeded. Please wait a moment and try again.'}</small>
+                                </td>
+                            </tr>`;
+                        document.getElementById("memberCount").textContent = 'Throttled';
+                        return;
+                    }
+
+                    if (!res.ok) {
+                        throw new Error(`HTTP Error: ${res.status}`);
+                    }
+
                     const data = await res.json();
                     membersData = data;
                 }
@@ -329,7 +399,7 @@
                             <td>${m.id}</td>
                             <td>${m.user_id}</td>
                             <td>${m.course_id}</td>
-                            <td>${m.roles}</td>
+                            <td><span class="badge bg-primary">${m.roles}</span></td>
                         </tr>
                     `);
                 });
@@ -338,7 +408,10 @@
                 renderPagination('memberPagination', paginated.currentPage, paginated.totalPages, loadMembers);
             } catch (error) {
                 document.getElementById("memberTableBody").innerHTML =
-                    `<tr><td colspan="4" class="text-center text-danger">${error.message}</td></tr>`;
+                    `<tr><td colspan="4" class="text-center text-danger">
+                        <i class="bi bi-x-circle-fill fs-2"></i><br>
+                        Error: ${error.message}
+                    </td></tr>`;
             }
         }
 
@@ -350,6 +423,27 @@
             try {
                 if (contentsData.length === 0) {
                     const res = await fetch("/api/v1/contents");
+
+                    // Check for throttling
+                    if (res.status === 429) {
+                        const errorData = await res.json();
+                        const body = document.getElementById("contentTableBody");
+                        body.innerHTML = `
+                            <tr>
+                                <td colspan="6" class="text-center text-warning">
+                                    <i class="bi bi-exclamation-triangle-fill fs-2"></i><br>
+                                    <strong>TOO MANY REQUESTS!</strong><br>
+                                    <small>${errorData.detail || 'Throttling limit exceeded. Please wait a moment and try again.'}</small>
+                                </td>
+                            </tr>`;
+                        document.getElementById("contentCount").textContent = 'Throttled';
+                        return;
+                    }
+
+                    if (!res.ok) {
+                        throw new Error(`HTTP Error: ${res.status}`);
+                    }
+
                     const data = await res.json();
                     contentsData = data;
                 }
@@ -367,7 +461,9 @@
                             <td>${c.course_id}</td>
                             <td>${c.name}</td>
                             <td>${c.description}</td>
-                            <td><a href="${c.video_url}" target="_blank">Link</a></td>
+                            <td>${c.video_url ? `<a href="${c.video_url}" target="_blank" class="btn btn-sm btn-primary">
+                                <i class="bi bi-play-circle"></i> Link
+                            </a>` : '-'}</td>
                             <td>${c.file_attachment ?? "-"}</td>
                         </tr>
                     `);
@@ -377,7 +473,10 @@
                 renderPagination('contentPagination', paginated.currentPage, paginated.totalPages, loadContents);
             } catch (error) {
                 document.getElementById("contentTableBody").innerHTML =
-                    `<tr><td colspan="6" class="text-center text-danger">${error.message}</td></tr>`;
+                    `<tr><td colspan="6" class="text-center text-danger">
+                        <i class="bi bi-x-circle-fill fs-2"></i><br>
+                        Error: ${error.message}
+                    </td></tr>`;
             }
         }
 
@@ -389,6 +488,27 @@
             try {
                 if (commentsData.length === 0) {
                     const res = await fetch("/api/v1/comments");
+
+                    // Check for throttling
+                    if (res.status === 429) {
+                        const errorData = await res.json();
+                        const body = document.getElementById("commentTableBody");
+                        body.innerHTML = `
+                            <tr>
+                                <td colspan="4" class="text-center text-warning">
+                                    <i class="bi bi-exclamation-triangle-fill fs-2"></i><br>
+                                    <strong>TOO MANY REQUESTS!</strong><br>
+                                    <small>${errorData.detail || 'Throttling limit exceeded. Please wait a moment and try again.'}</small>
+                                </td>
+                            </tr>`;
+                        document.getElementById("commentCount").textContent = 'Throttled';
+                        return;
+                    }
+
+                    if (!res.ok) {
+                        throw new Error(`HTTP Error: ${res.status}`);
+                    }
+
                     const data = await res.json();
                     commentsData = data;
                 }
@@ -414,7 +534,10 @@
                 renderPagination('commentPagination', paginated.currentPage, paginated.totalPages, loadComments);
             } catch (error) {
                 document.getElementById("commentTableBody").innerHTML =
-                    `<tr><td colspan="4" class="text-center text-danger">${error.message}</td></tr>`;
+                    `<tr><td colspan="4" class="text-center text-danger">
+                        <i class="bi bi-x-circle-fill fs-2"></i><br>
+                        Error: ${error.message}
+                    </td></tr>`;
             }
         }
 

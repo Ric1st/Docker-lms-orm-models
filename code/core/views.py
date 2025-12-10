@@ -13,6 +13,7 @@ from django.contrib.auth import login
 from .models import Course, CourseMember, CourseContent, Comment, Completion
 from .forms import UserEditForm, UserAddForm, RegisterForm, CourseForm, CourseContentForm
 from .importer import import_content_from_csv
+from django.core.paginator import Paginator
 
 User = get_user_model()
 
@@ -87,8 +88,14 @@ def users(request):
     Tcourse = CourseMember.objects.values('course_id').distinct().count()
     Tmember = CourseMember.objects.filter(roles = 'std').values('user_id').distinct().count()
     rata2 = Tcourse/Tmember
+
+    paginator = Paginator(myusers, 5) 
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
     context = {
-        'myusers': myusers,
+        'myusers': page_obj,
+        'page_obj': page_obj,
         'query': query,
         'search_message': message,
         'total_users': User.objects.all().count(),
@@ -342,9 +349,14 @@ def course_content_list(request, course_pk):
 
     owner = (course.teacher == user)
 
+    paginator = Paginator(contents, 6) 
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     context = {
         'course': course,
-        'contents': contents,
+        'contents': page_obj,
+        'page_obj': page_obj,
         'is_member': is_member,
         'total': student_count,
         'student_list': student_list,   
