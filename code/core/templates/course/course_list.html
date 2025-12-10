@@ -35,10 +35,14 @@
         <div class="col-md-2 d-grid">
             <select name="sort" class="form-select form-select-lg text-center bg-primary">
                 <option value="">Filter</option>
-                <option value="harga_asc" {% if sort == 'harga_asc' %} selected{% endif %}>Harga Termurah</option> <!-- harga termurah -->
-                <option value="harga_desc" {% if sort == 'harga_desc' %} selected{% endif %}>Harga Termahal</option> <!-- harga termahal -->
-                <option value="member_desc" {% if sort == 'member_desc' %} selected{% endif %}>Terpopuler</option> <!-- member tersedikit -->
-                <option value="member_asc" {% if sort == 'member_asc' %} selected{% endif %}>Kurang Diminati</option> <!-- member terbanyak -->
+                <option value="harga_asc" {% if sort=='harga_asc' %} selected{% endif %}>Harga Termurah</option>
+                <!-- harga termurah -->
+                <option value="harga_desc" {% if sort=='harga_desc' %} selected{% endif %}>Harga Termahal</option>
+                <!-- harga termahal -->
+                <option value="member_desc" {% if sort=='member_desc' %} selected{% endif %}>Terpopuler</option>
+                <!-- member tersedikit -->
+                <option value="member_asc" {% if sort=='member_asc' %} selected{% endif %}>Kurang Diminati</option>
+                <!-- member terbanyak -->
             </select>
         </div>
     </form>
@@ -51,15 +55,18 @@
 </header>
 
 <!-- KARTU KURSUS -->
-Diurutkan berdasarkan<hr>
+Diurutkan berdasarkan
+<hr>
 <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
     {% for course in courses %}
     <div class="col">
         <div class="card h-100 shadow-sm border-0 course-card">
-            <img src="{% if course.image %}{{ course.image.url }}{% else %}
-                      https://placehold.co/600x400/0d6efd/ffffff?text=LMS+Course
-                      {% endif %}" class="card-img-top object-fit-cover" alt="{{ course.name }}"
-                style="height: 200px;">
+            {% load static %}
+            <img src="{% if course.image %}
+                {{ course.image.url }}
+             {% else %}
+                {% static 'core/images/default_course_image.jpg' %}
+             {% endif %}" class="card-img-top object-fit-cover" alt="{{ course.name }}" style="height: 200px;">
             <div class="card-body d-flex flex-column">
                 <h5 class="card-title text-truncate text-primary">{{ course.name }}</h5>
                 <p class="card-text text-muted mb-3 flex-grow-1">{{ course.description|truncatechars:100 }}</p>
