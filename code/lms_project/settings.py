@@ -82,7 +82,7 @@ DATABASES = {
         'USER': 'postgres',
         'PASSWORD': 'KNDWwxNorEUavPOznjVLwMBXlPBqxpWK',
         'HOST': 'trolley.proxy.rlwy.net', 
-        'PORT': '50095',
+        'PORT': '5432',
     }
 }
 
