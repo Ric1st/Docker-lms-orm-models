@@ -55,10 +55,40 @@
 </header>
 
 <!-- KARTU KURSUS -->
-Diurutkan berdasarkan
 <hr>
 <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-    
+    {% for course in courses %}
+    <div class="col">
+        <div class="card h-100 shadow-sm border-0 course-card">
+            <img src="https://placehold.co/600x400/0d6efd/ffffff?text=LMS+Course" class="card-img-top object-fit-cover"
+                style="height: 200px;">
+
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title text-truncate text-primary">{{ course.name }}</h5>
+                <p class="card-text text-muted mb-3 flex-grow-1">{{ course.description|truncatechars:100 }}</p>
+
+                <div class="d-flex justify-content-between align-items-center mt-auto">
+                    <h4 class="text-success fw-bold mb-0">
+                        Rp{{ course.price|intcomma }}
+                    </h4>
+                    <a href="{% url 'course_detail' course.pk %}" class="btn btn-primary fw-semibold">
+                        Lihat Detail
+                    </a>
+                </div>
+            </div>
+            {% if user.is_staff or user.is_superuser %}
+            <div class="card-footer bg-light border-top d-flex justify-content-between">
+                <a href="{% url 'course_edit' course.pk %}" class="btn btn-sm btn-warning text-dark">
+                    <i class="fas fa-edit me-1"></i> Edit
+                </a>
+                <a href="{% url 'course_delete' course.pk %}" class="btn btn-sm btn-danger">
+                    <i class="fas fa-trash-alt me-1"></i> Hapus
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% empty %}
     <div class="col-12">
         <div class="alert alert-warning text-center shadow-sm" role="alert">
             <h4 class="alert-heading">Belum Ada Mata Kuliah!</h4>
@@ -66,5 +96,6 @@ Diurutkan berdasarkan
                 untuk menambahkan Course baru.</p>
         </div>
     </div>
+    {% endfor %}
 </div>
 {% endblock %}
