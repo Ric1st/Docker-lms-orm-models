@@ -46,6 +46,12 @@
             </select>
         </div>
     </form>
+
+    {% if search_message %}
+    <div class="alert alert-info mt-3 mb-0 shadow-sm">
+        <i class="fas fa-lightbulb me-2"></i> {{ search_message }} ({{ courses|length }} ditemukan)
+    </div>
+    {% endif %}
 </header>
 
 <!-- KARTU KURSUS -->
