@@ -298,16 +298,19 @@ class CourseListView(ListView):
         context['sort'] = sort_option
 
         context['search_message'] = None 
-        context['sort_message'] = None
-     
+        context['sort_message'] = None   
+
         if sort_option == 'harga_asc':
             context['sort_message'] = 'Harga Termurah'
         elif sort_option == 'harga_desc':
             context['sort_message'] = 'Harga Termahal'
         elif sort_option == 'member_asc':
-            context['sort_message'] = 'Jumlah Member Paling Sedikit'
+            context['sort_message'] = 'Kurang Diminati'
         elif sort_option == 'member_desc':
-            context['sort_message'] = 'Jumlah Member Paling Banyak'
+            context['sort_message'] = 'Terpopuler'
+    
+        if query:
+            context['search_message'] = f"Hasil pencarian untuk '{query}'"
             
         return context
 
