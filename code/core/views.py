@@ -258,21 +258,55 @@ def user_delete(request, pk):
 # --- VIEWS COURSE & CONTENT MANAGEMENT (DIKOREKSI) ---
 
 class CourseListView(ListView):
-    template_name = 'course/course_list.html' 
+    model = Course
+    template_name = 'course/course_list.html'
     context_object_name = 'courses'
+    ordering = ['-created_at']
 
     def get_queryset(self):
-        return self.model.objects.none()
+        query = self.request.GET.get('q')
+        sort_option = self.request.GET.get('sort')
+        queryset = super().get_queryset()
+
+        queryset = super().get_queryset().annotate(
+            member_count=Count('coursemember', filter=Q(coursemember__roles='std'))
+        )
+
+        if query:
+            queryset = queryset.filter(
+                Q(name__icontains=query) | Q(description__icontains=query)
+            )
+
+        if sort_option == 'harga_asc':
+            queryset = queryset.order_by('price') 
+        elif sort_option == 'harga_desc':
+            queryset = queryset.order_by('-price')
+        elif sort_option == 'member_asc':
+            queryset = queryset.order_by('member_count')
+        elif sort_option == 'member_desc':
+            queryset = queryset.order_by('-member_count')
+        
+        return queryset
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs) 
+        context = super().get_context_data(**kwargs)
         
-        context['query'] = ''       
-        context['sort'] = ''          
-        context['search_message'] = None
-        
-        context['request'] = self.request 
-        
+        sort_option = self.request.GET.get('sort')
+        query = self.request.GET.get('q')
+
+        context['query'] = query 
+        context['sort'] = sort_option
+     
+        context['sort_message'] = None
+        if sort_option == 'harga_asc':
+            context['sort_message'] = 'Harga Termurah'
+        elif sort_option == 'harga_desc':
+            context['sort_message'] = 'Harga Termahal'
+        elif sort_option == 'member_asc':
+            context['sort_message'] = 'Jumlah Member Paling Sedikit'
+        elif sort_option == 'member_desc':
+            context['sort_message'] = 'Jumlah Member Paling Banyak'
+            
         return context
 
 @login_required
