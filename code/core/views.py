@@ -258,28 +258,21 @@ def user_delete(request, pk):
 # --- VIEWS COURSE & CONTENT MANAGEMENT (DIKOREKSI) ---
 
 class CourseListView(ListView):
-    def get(self, request, *args, **kwargs):
-        return render(request, 'apihtml.html', {})
+    template_name = 'course/course_list.html' 
+    context_object_name = 'courses'
+
+    def get_queryset(self):
+        return self.model.objects.none()
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs) 
         
-        sort_option = self.request.GET.get('sort')
-        query = self.request.GET.get('q')
-
-        context['query'] = query 
-        context['sort'] = sort_option
-     
-        context['sort_message'] = None
-        if sort_option == 'harga_asc':
-            context['sort_message'] = 'Harga Termurah'
-        elif sort_option == 'harga_desc':
-            context['sort_message'] = 'Harga Termahal'
-        elif sort_option == 'member_asc':
-            context['sort_message'] = 'Jumlah Member Paling Sedikit'
-        elif sort_option == 'member_desc':
-            context['sort_message'] = 'Jumlah Member Paling Banyak'
-            
+        context['query'] = ''       
+        context['sort'] = ''          
+        context['search_message'] = None
+        
+        context['request'] = self.request 
+        
         return context
 
 @login_required
