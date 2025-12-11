@@ -261,16 +261,14 @@ class CourseListView(ListView):
     model = Course
     template_name = 'course/course_list.html'
     context_object_name = 'courses'
-    ordering = ['-created_at']
 
     def get_queryset(self):
         query = self.request.GET.get('q')
         sort_option = self.request.GET.get('sort')
-        queryset = super().get_queryset()
 
         queryset = super().get_queryset().annotate(
             member_count=Count('coursemember', filter=Q(coursemember__roles='std'))
-        )
+        ).order_by('-created_at') 
 
         if query:
             queryset = queryset.filter(
@@ -278,13 +276,13 @@ class CourseListView(ListView):
             )
 
         if sort_option == 'harga_asc':
-            queryset = queryset.order_by('price') 
+            queryset = queryset.order_by('price', '-created_at')
         elif sort_option == 'harga_desc':
-            queryset = queryset.order_by('-price')
+            queryset = queryset.order_by('-price', '-created_at')
         elif sort_option == 'member_asc':
-            queryset = queryset.order_by('member_count')
+            queryset = queryset.order_by('member_count', '-created_at')
         elif sort_option == 'member_desc':
-            queryset = queryset.order_by('-member_count')
+            queryset = queryset.order_by('-member_count', '-created_at')
         
         return queryset
 
