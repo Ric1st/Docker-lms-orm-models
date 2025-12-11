@@ -21,6 +21,7 @@
         Temukan dan pelajari mata kuliah terbaru. Total {{ courses|length }} kursus tersedia.
     </p>
 
+    <!-- FORM PENCARIAN -->
     <form method="get" class="row g-2 mt-3">
         <div class="col-md-8">
             <input type="search" name="q" class="form-control form-control-lg"
@@ -34,40 +35,41 @@
         <div class="col-md-2 d-grid">
             <select name="sort" class="form-select form-select-lg text-center bg-primary">
                 <option value="">Filter</option>
-                <option value="harga_asc" {% if sort=='harga_asc' %} selected{% endif %}>Harga Termurah</option>
-                <option value="harga_desc" {% if sort=='harga_desc' %} selected{% endif %}>Harga Termahal</option>
-                <option value="member_desc" {% if sort=='member_desc' %} selected{% endif %}>Terpopuler</option>
-                <option value="member_asc" {% if sort=='member_asc' %} selected{% endif %}>Kurang Diminati</option>
+                <option value="harga_asc" {% if sort='harga_asc' %} selected{% endif %}>Harga Termurah</option>
+                
+                <option value="harga_desc" {% if sort='harga_desc' %} selected{% endif %}>Harga Termahal</option>
+                
+                <option value="member_desc" {% if sort='member_desc' %} selected{% endif %}>Terpopuler</option>
+               
+                <option value="member_asc" {% if sort='member_asc' %} selected{% endif %}>Kurang Diminati</option>
+          
             </select>
         </div>
     </form>
 
-    {% if sort_message %}
+    {% if search_message %}
     <div class="alert alert-info mt-3 mb-0 shadow-sm">
-        <i class="fas fa-filter me-2"></i> Diurutkan berdasarkan: {{ sort_message }} ({{ courses|length }} ditemukan)
-    </div>
-    {% elif search_message %}
-    <div class="alert alert-info mt-3 mb-0 shadow-sm">
-        <i class="fas fa-search me-2"></i> {{ search_message }} ({{ courses|length }} ditemukan)
+        <i class="fas fa-lightbulb me-2"></i> {{ search_message }} ({{ courses|length }} ditemukan)
     </div>
     {% endif %}
 </header>
 
+<!-- KARTU KURSUS -->
 <hr>
 <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
     {% for course in courses %}
     <div class="col">
         <div class="card h-100 shadow-sm border-0 course-card">
             <img src="https://placehold.co/600x400/0d6efd/ffffff?text=LMS+Course" class="card-img-top object-fit-cover"
-                 style="height: 200px;">
+                style="height: 200px;">
 
             <div class="card-body d-flex flex-column">
-                <h5 class="card-title text-truncate text-primary">{{ course.name|default:"[Nama Kosong]" }}</h5>
-                <p class="card-text text-muted mb-3 flex-grow-1">{{ course.description|default:""|truncatechars:100 }}</p>
+                <h5 class="card-title text-truncate text-primary">{{ course.name }}</h5>
+                <p class="card-text text-muted mb-3 flex-grow-1">{{ course.description|truncatechars:100 }}</p>
 
                 <div class="d-flex justify-content-between align-items-center mt-auto">
                     <h4 class="text-success fw-bold mb-0">
-                        Rp{{ course.price|default:0|intcomma }}
+                        Rp{{ course.price|intcomma }}
                     </h4>
                     <a href="{% url 'course_detail' course.pk %}" class="btn btn-primary fw-semibold">
                         Lihat Detail

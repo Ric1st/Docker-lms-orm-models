@@ -297,8 +297,8 @@ class CourseListView(ListView):
         context['query'] = query 
         context['sort'] = sort_option
 
-        context['search_message'] = None 
-        context['sort_message'] = None   
+        context['search_message'] = 'None' 
+        context['sort_message'] = 'None'   
 
         if sort_option == 'harga_asc':
             context['sort_message'] = 'Harga Termurah'
