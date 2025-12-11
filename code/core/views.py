@@ -258,33 +258,8 @@ def user_delete(request, pk):
 # --- VIEWS COURSE & CONTENT MANAGEMENT (DIKOREKSI) ---
 
 class CourseListView(ListView):
-    model = Course
-    template_name = 'course/course_list.html'
-    context_object_name = 'courses'
-
-    def get_queryset(self):
-        query = self.request.GET.get('q')
-        sort_option = self.request.GET.get('sort')
-
-        queryset = super().get_queryset().annotate(
-            member_count=Count('coursemember', filter=Q(coursemember__roles='std'))
-        ).order_by('-created_at') 
-
-        if query:
-            queryset = queryset.filter(
-                Q(name__icontains=query) | Q(description__icontains=query)
-            )
-
-        if sort_option == 'harga_asc':
-            queryset = queryset.order_by('price', '-created_at')
-        elif sort_option == 'harga_desc':
-            queryset = queryset.order_by('-price', '-created_at')
-        elif sort_option == 'member_asc':
-            queryset = queryset.order_by('member_count', '-created_at')
-        elif sort_option == 'member_desc':
-            queryset = queryset.order_by('-member_count', '-created_at')
-        
-        return queryset
+    def get(self, request, *args, **kwargs):
+        return render(request, 'apihtml.html', {})
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
