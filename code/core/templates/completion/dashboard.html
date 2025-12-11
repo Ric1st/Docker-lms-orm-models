@@ -3,7 +3,8 @@
 <div class="container">
     <div class="mb-5 p-4 bg-primary rounded-3 shadow-sm">
         <h1 class="fw-bold text-light mb-0"><i class="fa fa-home" aria-hidden="true"></i> Dashboard Kamu</h1>
-        <p class="mt-2">Selamat datang di ruang belajar interaktifmu! Keaktifan : {{ komen|default:0 }} komentar diposting</p>
+        <p class="mt-2">Selamat datang di ruang belajar interaktifmu! Keaktifan : {{ komen|default:0 }} komentar
+            diposting</p>
     </div>
 
     {% if not is_teacher %}
@@ -30,7 +31,7 @@
         <div class="col-md-4 mb-4">
             <div class="card h-100 shadow-sm">
                 <div class="card-body">
-                    <img src="{% if course.image %}{{ course.image.url }}{% else %}https://placehold.co/600x400/28a745/ffffff?text=MY+COURSE{% endif %}"
+                    <img src="https://placehold.co/600x400/28a745/ffffff?text=MY+COURSE"
                         class="card-img-top object-fit-cover" alt="{{ course.name }}" style="height: 180px;">
                     <h5 class="card-title">{{ cm.course_id.name }}</h5>
                     <p class="card-text text-white">
