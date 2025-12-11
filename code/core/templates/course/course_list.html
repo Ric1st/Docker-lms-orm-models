@@ -20,38 +20,6 @@
     <p class="lead text-muted mb-3">
         Temukan dan pelajari mata kuliah terbaru. Total {{ courses|length }} kursus tersedia.
     </p>
-
-    <!-- FORM PENCARIAN -->
-    <form method="get" class="row g-2 mt-3">
-        <div class="col-md-8">
-            <input type="search" name="q" class="form-control form-control-lg"
-                placeholder="Cari nama atau deskripsi kursus..." value="{{ query|default:'' }}">
-        </div>
-        <div class="col-md-2 d-grid">
-            <button type="submit" class="btn btn-primary btn-lg fw-semibold">
-                <i class="fas fa-search me-2"></i> Cari
-            </button>
-        </div>
-        <div class="col-md-2 d-grid">
-            <select name="sort" class="form-select form-select-lg text-center bg-primary">
-                <option value="">Filter</option>
-                <option value="harga_asc" {% if sort=='harga_asc' %} selected{% endif %}>Harga Termurah</option>
-                <!-- harga termurah -->
-                <option value="harga_desc" {% if sort=='harga_desc' %} selected{% endif %}>Harga Termahal</option>
-                <!-- harga termahal -->
-                <option value="member_desc" {% if sort=='member_desc' %} selected{% endif %}>Terpopuler</option>
-                <!-- member tersedikit -->
-                <option value="member_asc" {% if sort=='member_asc' %} selected{% endif %}>Kurang Diminati</option>
-                <!-- member terbanyak -->
-            </select>
-        </div>
-    </form>
-
-    {% if search_message %}
-    <div class="alert alert-info mt-3 mb-0 shadow-sm">
-        <i class="fas fa-lightbulb me-2"></i> {{ search_message }} ({{ courses|length }} ditemukan)
-    </div>
-    {% endif %}
 </header>
 
 <!-- KARTU KURSUS -->
