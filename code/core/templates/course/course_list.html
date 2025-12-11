@@ -23,7 +23,10 @@
 
     <!-- FORM PENCARIAN -->
     <form method="get" class="row g-2 mt-3">
-        
+        <div class="col-md-8">
+            <input type="search" name="q" class="form-control form-control-lg"
+                placeholder="Cari nama atau deskripsi kursus..." >
+        </div>
         <div class="col-md-2 d-grid">
             <button type="submit" class="btn btn-primary btn-lg fw-semibold">
                 <i class="fas fa-search me-2"></i> Cari
@@ -32,18 +35,19 @@
         <div class="col-md-2 d-grid">
             <select name="sort" class="form-select form-select-lg text-center bg-primary">
                 <option value="">Filter</option>
-                <option value="harga_asc" >Harga Termurah</option>
+                <option value="harga_asc" {% if sort=='harga_asc' %} selected{% endif %}>Harga Termurah</option>
                 
-                <option value="harga_desc" >Harga Termahal</option>
+                <option value="harga_desc" {% if sort=='harga_desc' %} selected{% endif %}>Harga Termahal</option>
                 
-                <option value="member_desc">Terpopuler</option>
+                <option value="member_desc" {% if sort=='member_desc' %} selected{% endif %}>Terpopuler</option>
                
-                <option value="member_asc">Kurang Diminati</option>
+                <option value="member_asc" {% if sort=='member_asc' %} selected{% endif %}>Kurang Diminati</option>
           
             </select>
         </div>
     </form>
 
+    
 </header>
 
 <!-- KARTU KURSUS -->
