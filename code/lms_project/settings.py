@@ -22,7 +22,6 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -53,10 +52,10 @@ WSGI_APPLICATION = 'lms_project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'railway',
-        'USER': 'postgres',
-        'PASSWORD': 'KNDWwxNorEUavPOznjVLwMBXlPBqxpWK',
-        'HOST': 'postgres.railway.internal', 
+        'NAME': 'lms_db',
+        'USER': 'lms_user',
+        'PASSWORD': 'lms_password',
+        'HOST': 'postgres', 
         'PORT': '5432',
     }
 }
@@ -83,9 +82,6 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_TZ = True
-
-STATIC_URL = 'static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 MEDIA_URL = '/media/'
 
