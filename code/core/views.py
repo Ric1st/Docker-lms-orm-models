@@ -15,6 +15,9 @@ from .models import Course, CourseMember, CourseContent, Comment, Completion
 from .forms import UserEditForm, UserAddForm, RegisterForm, CourseForm, CourseContentForm
 from .importer import import_content_from_csv
 from django.core.paginator import Paginator
+from weasyprint import HTML
+from django.http import HttpResponse
+from django.template.loader import render_to_string
 
 User = get_user_model()
 
@@ -749,6 +752,28 @@ def mark_content_complete(request, content_id):
         messages.info(request, f"Konten {content.name} sudah selesai sebelumnya.")
        
     return redirect('course_content_list', course_pk=content.course_id.id)
+
+@login_required
+def render_sertif(request, course_id):
+    course = get_object_or_404(Course, pk=course_id)
+    
+    full_name = f"{request.user.first_name} {request.user.last_name}".strip()
+    if not full_name:
+        full_name = request.user.username
+
+    context = {
+        'full_name': full_name,
+        'course_name': course.name,
+    }
+
+    html_string = render_to_string('completion/certif.html', context)
+
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'inline; filename="Sertifikat_{full_name}.pdf"'
+
+    HTML(string=html_string).write_pdf(response)
+
+    return response
 
 
 # CSV 

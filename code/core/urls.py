@@ -40,6 +40,7 @@ urlpatterns = [
     path('course/<int:course_pk>/contents/csv/', views.content_import_csv, name='course_content_csv'),
     path('course/<int:course_pk>/content/<int:content_pk>/edit/', views.content_edit, name='course_content_edit'),
     path('course/<int:course_pk>/content/<int:content_pk>/delete/', views.content_delete, name='course_content_delete'),
+    path('course/<int:course_id>/certificate/', views.render_sertif, name='generate_certificate'),
     
     # URL Baru untuk Komentar (Harus di atas atau di bawah URL konten)
     path('comment/edit/<int:comment_pk>/', views.comment_edit, name='comment_edit'),

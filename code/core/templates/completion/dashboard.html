@@ -58,7 +58,7 @@
         <div class="col-md-4 mb-4">
             <div class="card h-100 shadow-sm">
                 <div class="card-body">
-                    <img src="{% if course.image %}{{ course.image.url }}{% else %}https://placehold.co/600x400/28a745/ffffff?text=MY+COURSE{% endif %}"
+                    <img src="https://placehold.co/600x400/28a745/ffffff?text={{course.name}}"
                         class="card-img-top object-fit-cover" alt="{{ course.name }}" style="height: 180px;">
                     <h5 class="card-title mt-2">{{ course.name }}</h5>
                     <p class="card-text">{{ course.description|truncatechars:100 }}</p>
@@ -101,8 +101,12 @@
                 {% endfor %}
             </ul>
 
-            <div class="d-flex justify-content-end">
-                <a href="{% url 'course_content_list' course_group.course.pk %}" class="btn btn-sm btn-success mt-3">
+            <div class="d-flex justify-content-end gap-2 mt-2">
+                <a href="{% url 'generate_certificate' course_group.course.pk %}" class="btn btn-sm btn-danger"
+                    target="_blank">
+                    Lihat Sertifikat
+                </a>
+                <a href="{% url 'course_content_list' course_group.course.pk %}" class="btn btn-sm btn-success">
                     Lihat Semua Konten
                 </a>
             </div>

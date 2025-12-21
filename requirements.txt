@@ -7,3 +7,4 @@ django-ninja-simple-jwt
 requests
 gunicorn==21.2.0
 whitenoise==6.6.0
+xhtml2pdf==0.2.17

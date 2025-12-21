@@ -61,6 +61,17 @@ DATABASES = {
     }
 }
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'lms_db',
+#         'USER': 'lms_user',
+#         'PASSWORD': 'lms_password',
+#         'HOST': 'postgres', 
+#         'PORT': '5432',
+#     }
+# }
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',

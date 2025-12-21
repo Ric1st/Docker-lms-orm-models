@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <style>
+        /* Definisi ukuran fisik A4 Landscape */
+        @page {
+            size: A4 landscape;
+            margin: 0;
+        }
+
+        body {
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            width: 297mm;
+            height: 210mm;
+        }
+
+        .certificate-wrapper {
+            width: 297mm;
+            height: 210mm;
+            padding: 10mm;
+            box-sizing: border-box;
+            background-color: #ffffff;
+        }
+
+        .certificate-border {
+            border: 10mm solid #1A3D64;
+            height: 190mm;
+            width: 277mm;
+            padding: 20mm;
+            box-sizing: border-box;
+            text-align: center;
+            position: relative;
+        }
+
+        .title {
+            font-size: 48pt;
+            color: #1A3D64;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .subtitle {
+            font-size: 18pt;
+            color: #555;
+            margin-top: 5mm;
+        }
+
+        .recipient-name {
+            font-size: 42pt;
+            font-weight: bold;
+            color: #2C3E50;
+            margin: 15mm 0;
+            border-bottom: 2pt solid #C5A02B;
+            display: inline-block;
+            padding: 0 15mm;
+        }
+
+        .course-name {
+            font-size: 26pt;
+            color: #16A085;
+            font-style: italic;
+            font-weight: bold;
+        }
+
+
+
+        .date-text {
+            font-size: 14pt;
+            color: #888;
+            margin-top: 5mm;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="certificate-wrapper">
+        <div class="certificate-border">
+            <div class="title">Sertifikat Kelulusan</div>
+            <div class="subtitle">Diberikan dengan hormat kepada:</div>
+
+            <div class="recipient-name">{{ full_name }}</div>
+
+            <div class="subtitle">Telah berhasil menyelesaikan kursus:</div>
+            <div class="course-name">"{{ course_name }}"</div>
+
+            <div class="footer">
+                <p style="font-size: 18pt; font-weight: bold; color: #1A3D64; margin-bottom: 0;">Simple LMS
+                    Interactive Learning</p>
+                <div class="date-text">Diterbitkan pada: {% now "d F Y" %}</div>
+            </div>
+        </div>
+
+    </div>
+</body>
+
+</html>
